@@ -1,25 +1,28 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.spectra.sports.config;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final Map<String, String[]> allowedUrls = new HashMap();
+@EnableWebSecurity
+public class SecurityConfig {
     @Autowired
     private AuthTokenFilter authTokenFilter;
+
+    private static final Map<String, String[]> allowedUrls = new HashMap();
 
     static {
         allowedUrls.put(HttpMethod.POST.name(), new String[]{
@@ -30,21 +33,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         });
     }
 
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-            .authorizeRequests()
-            .antMatchers(HttpMethod.POST, allowedUrls.get(HttpMethod.POST.name()))
-            .permitAll()
-            .antMatchers(HttpMethod.GET, allowedUrls.get(HttpMethod.GET.name()))
-            .permitAll()
-            .anyRequest()
-            .authenticated()
-            .and()
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http = http.authorizeHttpRequests( auth ->
+                auth.antMatchers(HttpMethod.POST, allowedUrls.get(HttpMethod.POST.name())).permitAll()
+                    .antMatchers(HttpMethod.GET, allowedUrls.get(HttpMethod.GET.name())).permitAll()
+            )
             .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .httpBasic()
             .disable()
-            .addFilterAfter(this.authTokenFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterAfter(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            .httpBasic(withDefaults());
+
+        return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web
+                .ignoring()
+                .antMatchers(HttpMethod.POST, allowedUrls.get(HttpMethod.POST.name()))
+                .antMatchers(HttpMethod.GET, allowedUrls.get(HttpMethod.GET.name()));
     }
 }

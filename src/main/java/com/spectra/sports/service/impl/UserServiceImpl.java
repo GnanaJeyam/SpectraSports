@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.spectra.sports.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

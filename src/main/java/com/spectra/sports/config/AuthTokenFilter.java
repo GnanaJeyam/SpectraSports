@@ -1,11 +1,5 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.spectra.sports.config;
 
-import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.helper.JwtHelper;
 import com.spectra.sports.helper.UserContextHolder;
 import java.io.IOException;
