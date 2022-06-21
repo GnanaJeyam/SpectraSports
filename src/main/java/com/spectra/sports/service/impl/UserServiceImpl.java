@@ -11,6 +11,7 @@ import com.spectra.sports.entity.Role;
 import com.spectra.sports.entity.RoleType;
 import com.spectra.sports.entity.User;
 import com.spectra.sports.helper.JwtHelper;
+import com.spectra.sports.mapper.UserMapper;
 import com.spectra.sports.repository.RoleRepository;
 import com.spectra.sports.repository.UserRepository;
 import com.spectra.sports.response.SuccessResponse;
@@ -37,7 +38,11 @@ public class UserServiceImpl implements UserService {
     private EmailService emailService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtHelper jwtHelper, EmailService emailService) {
+    public UserServiceImpl(UserRepository userRepository,
+                           RoleRepository roleRepository,
+                           BCryptPasswordEncoder bCryptPasswordEncoder,
+                           JwtHelper jwtHelper,
+                           EmailService emailService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
@@ -55,9 +60,8 @@ public class UserServiceImpl implements UserService {
             var roleIds = (Set)createdUser.getRoles().stream().map(Role::getRoleId).collect(Collectors.toSet());
             user.setRoles(this.roleRepository.getRolesByIds(roleIds));
             var from = UserDto.from(createdUser);
-            this.sendSignUpEmailOrOtpEmail((userDto) -> {
-                emailService.sendSignUpVerificationEmail(userDto);
-            }, from);
+            this.sendSignUpEmailOrOtpEmail((userDto) -> emailService.sendSignUpVerificationEmail(userDto), from);
+
             return new SuccessResponse(from, HttpStatus.OK.value(), false, "Sign up SuccessFul");
         } catch (Exception var5) {
             String message = "Duplicate User, Please try with different email or Number";
@@ -67,15 +71,16 @@ public class UserServiceImpl implements UserService {
 
     public SuccessResponse<?> updateUser(User user) {
         Assert.notNull(user, "User Cannot be null");
-        User existingUser = (User)this.userRepository.getById(user.getUserId());
-        user.setPassword(existingUser.getPassword());
-        User updatedUser = (User)this.userRepository.saveAndFlush(user);
+        var existingUser = userRepository.getReferenceById(user.getUserId());
+        user = UserMapper.mapUser(existingUser, user);
+        var updatedUser = userRepository.saveAndFlush(user);
+
         return SuccessResponse.defaultResponse(updatedUser, "User Updated SuccessFully");
     }
 
     public SuccessResponse<?> getUserById(Long userId) {
         try {
-            User user = (User)this.userRepository.getById(userId);
+            var user = userRepository.getReferenceById(userId);
             return new SuccessResponse(UserDto.from(user), HttpStatus.OK.value(), false, "Get by User Id");
         } catch (Exception var3) {
             return SuccessResponse.errorResponse(HttpStatus.NOT_FOUND.value(), "User Not Found");
@@ -99,11 +104,11 @@ public class UserServiceImpl implements UserService {
 
         var from = UserDto.from(user);
         return Map.of(
-                "body", from,
-                "status", HttpStatus.OK.value(),
-                "error", false,
-                "message", "Sign in Succeed",
-                "accessToken", jwtHelper.createToken(from)
+            "body", from,
+            "status", HttpStatus.OK.value(),
+            "error", false,
+            "message", "Sign in Succeed",
+            "accessToken", jwtHelper.createToken(from)
         );
     }
 
@@ -120,12 +125,12 @@ public class UserServiceImpl implements UserService {
     public String verifyUser(String token) {
         UserDto userDto;
         try {
-            userDto = this.jwtHelper.parseToken(token);
+            userDto = jwtHelper.parseToken(token);
         } catch (Exception var4) {
             return "<b>Invalid User. Please try again</b>";
         }
 
-        this.userRepository.updateUserVerified(userDto.userId());
+        userRepository.updateUserVerified(userDto.userId());
         String verifiedMessage = """
             <html>
             <head>

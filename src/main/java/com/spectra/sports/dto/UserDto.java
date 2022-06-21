@@ -32,7 +32,13 @@ public record UserDto(Long userId, String firstName, String lastName, String ema
     }
 
     public static UserDto from(User user) {
-        UserDto userDto = new UserDto(user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getMobileNumber(), user.getRoles(), user.getLocation(), user.getLatitude(), user.getLongitude(), user.getVerified(), user.getExperience(), user.getDescription(), user.getSpecialistIn(), user.getAvailableSlots(), user.getImageName(), user.getOtp());
+        UserDto userDto = new UserDto(
+            user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
+            user.getMobileNumber(), user.getRoles(), user.getLocation(), user.getLatitude(),
+            user.getLongitude(), user.getVerified(), user.getExperience(), user.getDescription(),
+            user.getSpecialistIn(), user.getAvailableSlots(), user.getImageName(), user.getOtp()
+        );
+
         return userDto;
     }
 }

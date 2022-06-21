@@ -39,23 +39,24 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             RequestMethod.GET.name(), List.of("/user/verify", "/email-otp", "/favicon.ico", "download")
         );
     }
+
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = request.getHeader("Authorization");
         if (token == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not Authenticated");
-        } else {
-            try {
-                var userDto = this.jwtHelper.parseToken(token);
-                UserContextHolder.setCurrentUser(userDto);
-                var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDto.email(), null, List.of());
-                usernamePasswordAuthenticationToken.setDetails((new WebAuthenticationDetailsSource()).buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            } catch (Exception var7) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, var7.getMessage());
-            }
-
-            filterChain.doFilter(request, response);
         }
+
+        try {
+            var userDto = this.jwtHelper.parseToken(token);
+            UserContextHolder.setCurrentUser(userDto);
+            var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDto.email(), null, List.of());
+            usernamePasswordAuthenticationToken.setDetails((new WebAuthenticationDetailsSource()).buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        } catch (Exception var7) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, var7.getMessage());
+        }
+
+        filterChain.doFilter(request, response);
     }
 
     protected boolean shouldNotFilter(HttpServletRequest request) {

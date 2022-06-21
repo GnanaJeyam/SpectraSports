@@ -16,31 +16,21 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(
-        name = "roles"
-)
+@Table(name = "roles")
 public class Role extends BaseEntity {
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.IDENTITY
-    )
-    @Column(
-            name = "role_id"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id")
     private Long roleId;
+
     @Enumerated(EnumType.STRING)
-    @Column(
-            name = "role_name",
-            length = 20
-    )
+    @Column(name = "role_name", length = 20)
     private RoleType roleType;
-    @Column(
-            name = "priority"
-    )
+
+    @Column(name = "priority")
     private Byte rolePriority;
 
-    public Role() {
-    }
+    public Role() {}
 
     public Role(Long roleId, RoleType roleType, Byte rolePriority) {
         this.roleId = roleId;

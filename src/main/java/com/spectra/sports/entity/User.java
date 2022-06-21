@@ -10,7 +10,6 @@ import com.vladmihalcea.hibernate.type.json.JsonType;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,125 +26,78 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 @Entity
-@Table(
-        name = "users",
-        uniqueConstraints = {@UniqueConstraint(
-                columnNames = {"mobile_number"}
-        ), @UniqueConstraint(
-                columnNames = {"email"}
-        )}
-)
-@TypeDefs({@TypeDef(
-        name = "json",
-        typeClass = JsonType.class
-), @TypeDef(
-        name = "string-array",
-        typeClass = StringArrayType.class
-)})
+@Table( name = "users", uniqueConstraints = {
+        @UniqueConstraint( columnNames = {"mobile_number"}),
+        @UniqueConstraint( columnNames = {"email"})
+})
+@TypeDefs({
+    @TypeDef( name = "json", typeClass = JsonType.class),
+    @TypeDef( name = "string-array", typeClass = StringArrayType.class)
+})
 public class User extends BaseEntity {
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.IDENTITY
-    )
-    @Column(
-            name = "user_id"
-    )
+    @GeneratedValue( strategy = GenerationType.IDENTITY )
+    @Column(name = "user_id")
     private Long userId;
-    @Column(
-            name = "first_name",
-            length = 30
-    )
+
+    @Column(name = "first_name", length = 30)
     private String firstName;
-    @Column(
-            name = "last_name",
-            length = 20
-    )
+
+    @Column(name = "last_name", length = 20)
     private String lastName;
-    @Column(
-            name = "email",
-            length = 50
-    )
+
+    @Column(name = "email", length = 50)
     private String email;
-    @Column(
-            name = "password",
-            length = 90
-    )
+
+    @Column(name = "password", length = 90)
     private String password;
-    @Column(
-            name = "mobile_number",
-            length = 12
-    )
+
+    @Column(name = "mobile_number", length = 12)
     private String mobileNumber;
+
     @ManyToMany
-    @JoinTable(
-            name = "USER_ROLES",
-            joinColumns = {@JoinColumn(
-                    name = "user_id"
-            )},
-            inverseJoinColumns = {@JoinColumn(
-                    name = "role_id"
-            )}
+    @JoinTable(name = "USER_ROLES",
+        joinColumns = {
+            @JoinColumn(name = "user_id")
+        },
+        inverseJoinColumns = {
+            @JoinColumn(name = "role_id")
+       }
     )
     private Set<Role> roles = new HashSet();
-    @Column(
-            name = "location",
-            length = 30
-    )
+
+    @Column(name = "location", length = 30)
     private String location;
-    @Column(
-            name = "latitude",
-            length = 30
-    )
+
+    @Column(name = "latitude", length = 30)
     private String latitude;
-    @Column(
-            name = "longitude",
-            length = 30
-    )
+
+    @Column(name = "longitude", length = 30)
     private String longitude;
-    @Column(
-            name = "otp",
-            length = 6
-    )
+
+    @Column(name = "otp", length = 6)
     private String otp;
-    @Column(
-            name = "is_verified"
-    )
+
+    @Column(name = "is_verified")
     @ColumnDefault("false")
     private Boolean isVerified;
-    @Column(
-            name = "experience",
-            length = 30
-    )
-    private String experience;
-    @Column(
-            name = "description",
-            length = 250
-    )
-    private String description;
-    @Type(
-            type = "string-array"
-    )
-    @Column(
-            name = "specialistin",
-            columnDefinition = "text[]"
-    )
-    private String[] specialistIn;
-    @Type(
-            type = "json"
-    )
-    @Column(
-            name = "available_slots",
-            columnDefinition = "json"
-    )
-    private List<Slot> availableSlots;
-    @Column(
-            name = "image_name",
-            length = 250
-    )
-    private String imageName;
 
-    public User() {
-    }
+    @Column(name = "experience", length = 30)
+    private String experience;
+
+    @Column(name = "description", length = 250)
+    private String description;
+
+    @Type(type = "string-array")
+    @Column(name = "specialistin", columnDefinition = "text[]")
+    private String[] specialistIn;
+
+    @Type(type = "json")
+    @Column(name = "available_slots", columnDefinition = "json")
+    private List<Slot> availableSlots;
+
+    @Column(name = "image_name", length = 250)
+    private String imageName;
 
     public Long getUserId() {
         return this.userId;
