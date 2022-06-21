@@ -35,17 +35,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http = http.authorizeHttpRequests( auth ->
-                auth.antMatchers(HttpMethod.POST, allowedUrls.get(HttpMethod.POST.name())).permitAll()
-                    .antMatchers(HttpMethod.GET, allowedUrls.get(HttpMethod.GET.name())).permitAll()
-            )
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .httpBasic()
-            .disable()
-            .addFilterAfter(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
-            .httpBasic(withDefaults());
+        http.authorizeHttpRequests(auth ->
+                auth
+                    .antMatchers(HttpMethod.POST, allowedUrls.get(HttpMethod.POST.name())).permitAll()
+                    .antMatchers(HttpMethod.GET, allowedUrls.get(HttpMethod.GET.name())).permitAll())
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .httpBasic()
+                .disable()
+                .addFilterAfter(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .httpBasic(withDefaults());
 
         return http.build();
     }
