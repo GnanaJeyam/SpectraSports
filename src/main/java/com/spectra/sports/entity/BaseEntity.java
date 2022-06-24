@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.spectra.sports.entity;
 
 import java.time.LocalDateTime;
@@ -13,23 +8,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @MappedSuperclass
 public class BaseEntity {
-    @Column(
-            name = "created_by"
-    )
+    @Column(name = "created_by")
     private Long createdBy;
-    @Column(
-            name = "updated_by"
-    )
+
+    @Column(name = "updated_by")
     private Long updatedBy;
+
     @CreationTimestamp
-    @Column(
-            name = "created_at"
-    )
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
-    @Column(
-            name = "updated_at"
-    )
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public BaseEntity() {
