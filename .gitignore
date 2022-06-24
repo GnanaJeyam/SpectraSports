@@ -9,6 +9,7 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+.gradle/**
 .gradle
 .idea
 
@@ -75,8 +76,7 @@ fabric.properties
 *.DS_Store
 .AppleDouble
 .LSOverride
-./.gradle
-./.gradle/**
+
 # Icon must end with two \r
 Icon
 
@@ -116,7 +116,6 @@ Desktop.ini
 $RECYCLE.BIN/
 
 ### Gradle ###
-.gradle/**
 
 # Ignore Gradle GUI config
 gradle-app.setting
