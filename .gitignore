@@ -6,6 +6,11 @@
 ./idea/**
 ./idea
 ./*.iml
+# Default ignored files
+/shelf/
+/workspace.xml
+.gradle
+.idea
 
 # User-specific stuff:
 .idea/**/workspace.xml

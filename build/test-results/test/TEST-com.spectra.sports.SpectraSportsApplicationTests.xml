@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.spectra.sports.SpectraSportsApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-06-20T08:25:57" hostname="GnanaJeyams-MacBook-Pro.local" time="0.01">
+<testsuite name="com.spectra.sports.SpectraSportsApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-06-21T13:42:37" hostname="GnanaJeyams-MacBook-Pro.local" time="0.01">
   <properties/>
   <testcase name="contextLoads()" classname="com.spectra.sports.SpectraSportsApplicationTests" time="0.01"/>
   <system-out><![CDATA[]]></system-out>
