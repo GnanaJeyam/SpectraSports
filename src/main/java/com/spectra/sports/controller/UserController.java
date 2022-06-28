@@ -60,12 +60,14 @@ public class UserController {
     }
 
     @GetMapping({"/all/{role}"})
-    ResponseEntity<List<UserDto>> getAllUsersByRole(@PathVariable("role") String role, @RequestParam("page") Integer page, @RequestParam(value = "limit",defaultValue = "10") Integer limit) {
+    ResponseEntity<List<UserDto>> getAllUsersByRole(@PathVariable("role") String role,
+                                                    @RequestParam("page") Integer page,
+                                                    @RequestParam(value = "limit",defaultValue = "10") Integer limit) {
         List<UserDto> allUsersByRole = userService.getAllUsersByRole(role, page, limit);
+
         return ResponseEntity.ok(allUsersByRole);
     }
 
-    /** @deprecated */
     @GetMapping({"/download"})
     @Deprecated
     ResponseEntity<Resource> download(@RequestParam("name") String test) {

@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
         user = UserMapper.mapUser(existingUser, user);
         var updatedUser = userRepository.saveAndFlush(user);
 
-        return SuccessResponse.defaultResponse(updatedUser, "User Updated SuccessFully");
+        return SuccessResponse.defaultResponse(UserDto.from(updatedUser), "User Updated SuccessFully");
     }
 
     public SuccessResponse<?> getUserById(Long userId) {

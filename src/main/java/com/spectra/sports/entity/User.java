@@ -70,10 +70,10 @@ public class User extends BaseEntity {
     private String location;
 
     @Column(name = "latitude", length = 30)
-    private String latitude;
+    private Double latitude;
 
     @Column(name = "longitude", length = 30)
-    private String longitude;
+    private Double longitude;
 
     @Column(name = "otp", length = 6)
     private String otp;
@@ -163,19 +163,19 @@ public class User extends BaseEntity {
         this.location = location;
     }
 
-    public String getLatitude() {
+    public Double getLatitude() {
         return this.latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public String getLongitude() {
+    public Double getLongitude() {
         return this.longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
