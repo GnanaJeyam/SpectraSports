@@ -1,12 +1,18 @@
 package com.spectra.sports.entity;
 
-import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import com.spectra.sports.helper.UserContextHolder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import java.time.LocalDateTime;
+
 @MappedSuperclass
+@Data
 public class BaseEntity {
     @Column(name = "created_by")
     private Long createdBy;
@@ -21,39 +27,4 @@ public class BaseEntity {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public BaseEntity() {
-    }
-
-    public Long getCreatedBy() {
-        return this.createdBy;
-    }
-
-    public void setCreatedBy(Long createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Long getUpdatedBy() {
-        return this.updatedBy;
-    }
-
-    public void setUpdatedBy(Long updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return this.createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return this.updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }

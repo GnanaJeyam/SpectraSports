@@ -47,7 +47,10 @@ public class SecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .exceptionHandling()
-            .accessDeniedHandler((req, res, exception) -> res.sendError(UNAUTHORIZED.value(), exception.getMessage()))
+            .accessDeniedHandler((req, res, exception) -> {
+                res.sendError(UNAUTHORIZED.value(), exception.getMessage());
+                res.setStatus(UNAUTHORIZED.value());
+            })
             .and()
             .httpBasic()
             .disable()

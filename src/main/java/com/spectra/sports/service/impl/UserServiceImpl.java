@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     public SuccessResponse<?> addUser(User user) {
         Assert.notNull(user, "User Cannot be null");
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setVerified(false);
+        user.setIsVerified(false);
 
         try {
             var createdUser =  userRepository.save(user);
@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
         if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
             return getResponse(HttpStatus.UNAUTHORIZED.value(), "Invalid username or password");
         }
-        if (!user.getVerified()) {
+        if (!user.getIsVerified()) {
             return getResponse(HttpStatus.NOT_ACCEPTABLE.value(), "User not verified yet.");
         }
 

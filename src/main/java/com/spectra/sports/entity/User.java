@@ -20,6 +20,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -34,6 +36,7 @@ import org.hibernate.annotations.TypeDefs;
     @TypeDef( name = "json", typeClass = JsonType.class),
     @TypeDef( name = "string-array", typeClass = StringArrayType.class)
 })
+@Data
 public class User extends BaseEntity {
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY )
@@ -98,140 +101,4 @@ public class User extends BaseEntity {
 
     @Column(name = "image_name", length = 250)
     private String imageName;
-
-    public Long getUserId() {
-        return this.userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return this.lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getMobileNumber() {
-        return this.mobileNumber;
-    }
-
-    public void setMobileNumber(String mobileNumber) {
-        this.mobileNumber = mobileNumber;
-    }
-
-    public Set<Role> getRoles() {
-        return this.roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public String getLocation() {
-        return this.location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public Double getLatitude() {
-        return this.latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
-        return this.longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Boolean getVerified() {
-        return this.isVerified;
-    }
-
-    public void setVerified(Boolean verified) {
-        this.isVerified = verified;
-    }
-
-    public String getOtp() {
-        return this.otp;
-    }
-
-    public void setOtp(String otp) {
-        this.otp = otp;
-    }
-
-    public String getExperience() {
-        return this.experience;
-    }
-
-    public void setExperience(String experience) {
-        this.experience = experience;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String[] getSpecialistIn() {
-        return this.specialistIn;
-    }
-
-    public void setSpecialistIn(String[] specialistIn) {
-        this.specialistIn = specialistIn;
-    }
-
-    public List<Slot> getAvailableSlots() {
-        return this.availableSlots;
-    }
-
-    public void setAvailableSlots(List<Slot> availableSlots) {
-        this.availableSlots = availableSlots;
-    }
-
-    public String getImageName() {
-        return this.imageName;
-    }
-
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
-    }
 }

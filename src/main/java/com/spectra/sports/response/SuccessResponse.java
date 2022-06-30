@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.spectra.sports.response;
 
 import java.util.Map;
@@ -22,21 +17,5 @@ public record SuccessResponse<T>(T body, int status, boolean error, String messa
 
     public static SuccessResponse errorResponse(int status, String message) {
         return new SuccessResponse(Map.of(), status, true, message);
-    }
-
-    public T body() {
-        return this.body;
-    }
-
-    public int status() {
-        return this.status;
-    }
-
-    public boolean error() {
-        return this.error;
-    }
-
-    public String message() {
-        return this.message;
     }
 }

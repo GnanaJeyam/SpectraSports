@@ -10,7 +10,7 @@ public final class UserMapper {
 
     public static User mapUser(User source, User dest) {
         dest.setPassword(ofNullable(dest.getPassword()).orElse(source.getPassword()));
-        dest.setVerified(source.getVerified());
+        dest.setIsVerified(source.getIsVerified());
         dest.setEmail(ofNullable(dest.getEmail()).orElse(source.getEmail()));
         dest.setDescription(ofNullable(dest.getDescription()).orElse(source.getDescription()));
         dest.setExperience(ofNullable(dest.getExperience()).orElse(source.getExperience()));
