@@ -1,12 +1,10 @@
 package com.spectra.sports.dao;
 
-import com.spectra.sports.entity.Slot;
 import com.spectra.sports.entity.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -28,7 +26,7 @@ public class UserDao {
             ))) AS dist from users u JOIN user_roles uro on u.user_id = uro.user_id join
             roles r on uro.role_id = r.role_id  WHERE r.role_name = 'MENTOR' AND
             u.user_id <> ? ) as output 
-         WHERE output.dist < 3
+         WHERE output.dist < 15
     """;
 
     public UserDao(JdbcTemplate jdbcTemplate) {
