@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
             <title> SpectraSports </title>
             </head>
             <body>
-            <b> %s has been verified </b>
+            <b> Congratulations, %s! Your account has been verified </b>
             </body>
             </html
             """.formatted(userDto.firstName());
