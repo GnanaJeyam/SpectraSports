@@ -12,6 +12,8 @@ public interface EventService {
 
     SuccessResponse<EventDto> getEventById(Long eventId);
 
+    SuccessResponse<Boolean> deleteEventById(Long eventId);
+
     SuccessResponse<List<EventDto>> getAllEventsByUserId();
 
     SuccessResponse<List<EventDto>> getAllOngoingEvents();

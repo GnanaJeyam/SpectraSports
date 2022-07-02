@@ -52,20 +52,20 @@ public class UserController {
         return sentOtp;
     }
 
-    @PostMapping({"/verification-email"})
-    SuccessResponse<String> sendVerificationEmail(@RequestParam("email") String email) {
-        var sentOtp = userService.resendVerificationEmail(email);
+    @GetMapping({"/nearby-mentors"})
+    SuccessResponse<List<UserDto>> sendEmailOtp() {
+        var nearByMentors = userService.getNearByMentors();
 
-        return sentOtp;
+        return nearByMentors;
     }
 
     @GetMapping({"/all/{role}"})
-    ResponseEntity<List<UserDto>> getAllUsersByRole(@PathVariable("role") String role,
+    SuccessResponse<List<UserDto>> getAllUsersByRole(@PathVariable("role") String role,
                                                     @RequestParam("page") Integer page,
                                                     @RequestParam(value = "limit",defaultValue = "10") Integer limit) {
-        List<UserDto> allUsersByRole = userService.getAllUsersByRole(role, page, limit);
+        var allUsersByRole = userService.getAllUsersByRole(role, page, limit);
 
-        return ResponseEntity.ok(allUsersByRole);
+        return SuccessResponse.defaultResponse(allUsersByRole, "Get Users By Role");
     }
 
     @GetMapping({"/download"})
@@ -83,18 +83,18 @@ public class UserController {
         return newUser;
     }
 
-    @PutMapping({"/update"})
-    SuccessResponse<?> updateUser(@RequestBody User user) {
-        var updatedUser = userService.updateUser(user);
-
-        return updatedUser;
-    }
-
     @PostMapping({"/sign-in"})
     Map<String, ?> signInUser(@RequestBody Map<String, String> userCredentials) throws JsonProcessingException {
         var successResponse = userService.signInUser(userCredentials);
 
         return successResponse;
+    }
+
+    @PostMapping({"/verification-email"})
+    SuccessResponse<String> sendVerificationEmail(@RequestParam("email") String email) {
+        var sentOtp = userService.resendVerificationEmail(email);
+
+        return sentOtp;
     }
 
     @PostMapping({"/validate-otp"})
@@ -116,5 +116,12 @@ public class UserController {
         var uploadFileToS3 = s3Service.uploadFileToS3(file);
 
         return uploadFileToS3;
+    }
+
+    @PutMapping({"/update"})
+    SuccessResponse<?> updateUser(@RequestBody User user) {
+        var updatedUser = userService.updateUser(user);
+
+        return updatedUser;
     }
 }

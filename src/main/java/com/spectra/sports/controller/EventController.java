@@ -41,4 +41,10 @@ public class EventController {
 
         return eventService.getAllOngoingEvents();
     }
+
+    @DeleteMapping("/{eventId}")
+    public SuccessResponse<Boolean> deleteEventById(@PathVariable("eventId") Long eventId) {
+
+        return eventService.deleteEventById(eventId);
+    }
 }

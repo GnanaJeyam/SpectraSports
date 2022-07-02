@@ -14,6 +14,8 @@ public interface UserService {
 
     SuccessResponse<?> getUserById(Long userId);
 
+    SuccessResponse<List<UserDto>> getNearByMentors();
+
     Map<String, ? extends Object> signInUser(Map<String, String> credentials) throws JsonProcessingException;
 
     List<UserDto> getAllUsersByRole(String role, Integer page, Integer limit);

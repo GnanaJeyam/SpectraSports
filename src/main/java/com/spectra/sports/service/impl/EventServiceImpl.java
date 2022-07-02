@@ -12,6 +12,8 @@ import org.springframework.util.Assert;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.Boolean.TRUE;
+
 @Service
 public class EventServiceImpl implements EventService {
 
@@ -37,6 +39,13 @@ public class EventServiceImpl implements EventService {
         var event = eventRepository.getReferenceById(eventId);
 
         return SuccessResponse.defaultResponse(EventDto.from(event), "Retrieve Event %s".formatted(eventId));
+    }
+
+    @Override
+    public SuccessResponse<Boolean> deleteEventById(Long eventId) {
+        eventRepository.deleteById(eventId);
+
+        return SuccessResponse.defaultResponse(TRUE, "Event deleted");
     }
 
     @Override

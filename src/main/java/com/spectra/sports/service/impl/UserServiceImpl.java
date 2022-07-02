@@ -1,28 +1,32 @@
 package com.spectra.sports.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.spectra.sports.dao.UserDao;
 import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.Role;
 import com.spectra.sports.entity.RoleType;
 import com.spectra.sports.entity.User;
 import com.spectra.sports.helper.JwtHelper;
+import com.spectra.sports.helper.UserContextHolder;
 import com.spectra.sports.mapper.UserMapper;
 import com.spectra.sports.repository.RoleRepository;
 import com.spectra.sports.repository.UserRepository;
 import com.spectra.sports.response.SuccessResponse;
 import com.spectra.sports.service.EmailService;
 import com.spectra.sports.service.UserService;
-
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,18 +35,21 @@ public class UserServiceImpl implements UserService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private JwtHelper jwtHelper;
     private EmailService emailService;
+    private UserDao userDao;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            BCryptPasswordEncoder bCryptPasswordEncoder,
                            JwtHelper jwtHelper,
-                           EmailService emailService) {
+                           EmailService emailService,
+                           UserDao userDao) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtHelper = jwtHelper;
         this.emailService = emailService;
+        this.userDao = userDao;
     }
 
     public SuccessResponse<?> addUser(User user) {
@@ -82,6 +89,21 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public SuccessResponse<List<UserDto>> getNearByMentors() {
+        var user = UserContextHolder.getUser();
+        var latitude = user.latitude();
+        var longitude = user.longitude();
+
+        var nearByUsers = userDao.getAllUsers(latitude, longitude, user.userId());
+        var nearByList = nearByUsers.stream().map(UserDto::from).collect(Collectors.toList());
+        if( CollectionUtils.isEmpty(nearByUsers) ) {
+            nearByList = getAllUsersByRole("MENTOR", 1, 5);
+        }
+
+        return SuccessResponse.defaultResponse(nearByList, "Get All Nearby Mentors");
+    }
+
     public Map<String, ? extends Object> signInUser(Map<String, String> credentials) throws JsonProcessingException {
         var username = credentials.get("username");
         var password = credentials.get("password");
@@ -110,7 +132,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAllUsersByRole(String role, Integer page, Integer limit) {
         Assert.notNull(role, "Role cannot be null");
         var roleType = RoleType.valueOf(role.toUpperCase());
-        var pageable = PageRequest.of(page - 1, limit);
+        var pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "userId"));
         var allUsersByRole = userRepository.getAllUsersByRole(roleType, pageable);
 
         return allUsersByRole.stream().map(UserDto::from).collect(Collectors.toList());

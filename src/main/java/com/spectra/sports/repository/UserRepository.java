@@ -1,23 +1,19 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.spectra.sports.repository;
 
 import com.spectra.sports.entity.RoleType;
 import com.spectra.sports.entity.User;
-import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT user from User user WHERE user.email = :username")
     User getUserByUserName(String username);
 
-    @Query("    SELECT user from User user JOIN user.roles userRoles\n    WHERE userRoles.roleType = :role\n")
+    @Query("SELECT user from User user JOIN user.roles userRoles WHERE userRoles.roleType = :role ")
     List<User> getAllUsersByRole(RoleType role, Pageable pageable);
 
     @Modifying
