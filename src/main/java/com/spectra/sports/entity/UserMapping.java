@@ -1,9 +1,12 @@
 package com.spectra.sports.entity;
 
+import lombok.Data;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "user_mapping")
+@Data
 public class UserMapping extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,44 +24,4 @@ public class UserMapping extends BaseEntity {
 
     @Column(name = "sport_type")
     private String sportType;
-
-    public Long getUserMappingId() {
-        return userMappingId;
-    }
-
-    public void setUserMappingId(Long userMappingId) {
-        this.userMappingId = userMappingId;
-    }
-
-    public Long getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(Long studentId) {
-        this.studentId = studentId;
-    }
-
-    public Long getMentorId() {
-        return mentorId;
-    }
-
-    public void setMentorId(Long mentorId) {
-        this.mentorId = mentorId;
-    }
-
-    public Long getAcademyId() {
-        return academyId;
-    }
-
-    public void setAcademyId(Long academyId) {
-        this.academyId = academyId;
-    }
-
-    public String getSportType() {
-        return sportType;
-    }
-
-    public void setSportType(String sportType) {
-        this.sportType = sportType;
-    }
 }

@@ -6,10 +6,12 @@ import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.Role;
 import com.spectra.sports.entity.RoleType;
 import com.spectra.sports.entity.User;
+import com.spectra.sports.entity.UserMapping;
 import com.spectra.sports.helper.JwtHelper;
 import com.spectra.sports.helper.UserContextHolder;
 import com.spectra.sports.mapper.UserMapper;
 import com.spectra.sports.repository.RoleRepository;
+import com.spectra.sports.repository.UserMappingRepository;
 import com.spectra.sports.repository.UserRepository;
 import com.spectra.sports.response.SuccessResponse;
 import com.spectra.sports.service.EmailService;
@@ -26,12 +28,18 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.spectra.sports.entity.RoleType.ACADEMY;
+import static com.spectra.sports.entity.RoleType.MENTOR;
+import static java.util.Objects.nonNull;
 
 @Service
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
+    private UserMappingRepository userMappingRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private JwtHelper jwtHelper;
     private EmailService emailService;
@@ -40,12 +48,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
+                           UserMappingRepository userMappingRepository,
                            BCryptPasswordEncoder bCryptPasswordEncoder,
                            JwtHelper jwtHelper,
                            EmailService emailService,
                            UserDao userDao) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.userMappingRepository = userMappingRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtHelper = jwtHelper;
         this.emailService = emailService;
@@ -204,6 +214,65 @@ public class UserServiceImpl implements UserService {
                 userRepository.saveAndFlush(user);
                 return SuccessResponse.defaultResponse(Map.of(), "Password Updated");
         });
+    }
+
+    @Override
+    public SuccessResponse<String> updateUserMapping(Map<String, String> userDetails) {
+        var studentId = userDetails.get("studentId");
+        var mentorId = userDetails.get("mentorId");
+        var academyId = userDetails.get("academyId");
+
+        Function<String, Long> applyDefaultValue = (val) -> {
+            if (val == null) return 0l;
+            return Long.valueOf(val);
+        };
+
+        var userMapping = new UserMapping();
+        userMapping.setStudentId(applyDefaultValue.apply(studentId));
+        userMapping.setAcademyId(applyDefaultValue.apply(academyId));
+        userMapping.setMentorId(applyDefaultValue.apply(mentorId));
+
+        userMappingRepository.save(userMapping);
+
+        return SuccessResponse.defaultResponse(Map.of(), "User Mapping Added");
+    }
+
+    @Override
+    public SuccessResponse<List<UserDto>> getMentorsByUser() {
+        var currentUser = UserContextHolder.getUser();
+        var currentRole = currentUser.roles().stream().findFirst().orElseThrow();
+        var page = PageRequest.of(0, 20);
+        var hasAcademy = ACADEMY.equals(currentRole.getRoleType());
+
+        List<Map<String, Object>> mentors;
+        if (hasAcademy) {
+            mentors = userRepository.getAllMentorsByAcademy(currentUser.userId(), MENTOR, page);
+        } else {
+            mentors = userRepository.getAllMentorsByStudent(currentUser.userId(), MENTOR, page);
+        }
+
+        return SuccessResponse.defaultResponse(filterByAcademyOrStudent(mentors, hasAcademy), "Get All Mentors");
+    }
+
+    private List<UserDto> filterByAcademyOrStudent(List<Map<String, Object>> users, boolean hasAcademy) {
+        Map<Long, UserDto> bucket = new LinkedHashMap<>();
+        for (Map<String, Object> userContext : users) {
+            var user = (User) userContext.get("user");
+            var flag = (Boolean) userContext.get("flag");
+            var academyId = (Long) userContext.get("academyId");
+            var studentId = (Long) userContext.get("studentId");
+            var existingUser = bucket.get(user.getUserId());
+            if (existingUser != null) {
+                var academyOrStudentId = hasAcademy ? academyId : studentId;
+                if ( nonNull(academyOrStudentId) && academyOrStudentId > 0l ) {
+                    bucket.put(user.getUserId(), UserDto.from(user, flag));
+                }
+            } else {
+                bucket.put(user.getUserId(), UserDto.from(user, flag));
+            }
+        }
+
+        return bucket.values().stream().toList();
     }
 
     private Map<String, ? extends Object> getResponse(int status, String message) {

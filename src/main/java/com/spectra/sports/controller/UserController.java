@@ -7,16 +7,11 @@ import com.spectra.sports.response.SuccessResponse;
 import com.spectra.sports.service.S3Service;
 import com.spectra.sports.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -53,10 +48,17 @@ public class UserController {
     }
 
     @GetMapping({"/nearby-mentors"})
-    SuccessResponse<List<UserDto>> sendEmailOtp() {
+    SuccessResponse<List<UserDto>> getNearbyMentors() {
         var nearByMentors = userService.getNearByMentors();
 
         return nearByMentors;
+    }
+
+    @GetMapping({"/mentors"})
+    SuccessResponse<List<UserDto>> getAllMentors() {
+        var mentorsByRole = userService.getMentorsByUser();
+
+        return mentorsByRole;
     }
 
     @GetMapping({"/all/{role}"})
@@ -66,14 +68,6 @@ public class UserController {
         var allUsersByRole = userService.getAllUsersByRole(role, page, limit);
 
         return SuccessResponse.defaultResponse(allUsersByRole, "Get Users By Role");
-    }
-
-    @GetMapping({"/download"})
-    @Deprecated
-    ResponseEntity<Resource> download(@RequestParam("name") String test) {
-        String fileName = "attachment; filename=\"%s\"".formatted(new Object[]{test});
-        InputStream inputStream = s3Service.retrieveFileFromS3(test);
-        return ((BodyBuilder)ResponseEntity.ok().header("Content-Disposition", new String[]{fileName})).contentType(MediaType.APPLICATION_OCTET_STREAM).body(new InputStreamResource(inputStream));
     }
 
     @PostMapping({"/signup"})
@@ -123,5 +117,11 @@ public class UserController {
         var updatedUser = userService.updateUser(user);
 
         return updatedUser;
+    }
+
+    @PutMapping({"/update-mapping"})
+    SuccessResponse<?> updateUser(@RequestBody Map<String, String> userDetails) {
+
+        return userService.updateUserMapping(userDetails);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT user from User user WHERE user.email = :username")
@@ -15,6 +16,34 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT user from User user JOIN user.roles userRoles WHERE userRoles.roleType = :role ")
     List<User> getAllUsersByRole(RoleType role, Pageable pageable);
+
+    @Query("""
+            SELECT new Map(user as user, userMapping.academyId as academyId,   
+                userMapping.studentId as studentId,
+                ( CASE WHEN userMapping.studentId = :userId
+                THEN true else false END ) as flag )  
+            from User user LEFT JOIN UserMapping userMapping 
+            ON user.userId = userMapping.mentorId
+            JOIN user.roles userRoles
+             WHERE userRoles.roleType = :role
+             GROUP BY user.userId, userMapping.studentId, userMapping.mentorId, userMapping.academyId
+             ORDER BY user.userId DESC  
+    """)
+    List<Map<String, Object>> getAllMentorsByStudent(Long userId, RoleType role, Pageable pageable);
+
+    @Query("""
+            SELECT new Map(user as user, userMapping.academyId as academyId,   
+                userMapping.studentId as studentId,
+                ( CASE WHEN userMapping.academyId = :userId
+                THEN true else false END ) as flag )  
+            from User user LEFT JOIN UserMapping userMapping 
+            ON user.userId = userMapping.mentorId
+            JOIN user.roles userRoles
+             WHERE userRoles.roleType = :role
+             GROUP BY user.userId, userMapping.studentId, userMapping.mentorId, userMapping.academyId
+             ORDER BY user.userId DESC  
+    """)
+    List<Map<String, Object>> getAllMentorsByAcademy(Long userId, RoleType role, Pageable pageable);
 
     @Modifying
     @Query("UPDATE User user set user.isVerified = true WHERE user.userId = :userId")

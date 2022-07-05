@@ -29,4 +29,8 @@ public interface UserService {
     SuccessResponse<String> resendVerificationEmail(String email);
 
     SuccessResponse<String> resetPassword(Map<String, String> userDetails);
+
+    SuccessResponse<String> updateUserMapping(Map<String, String> userDetails);
+
+    SuccessResponse<List<UserDto>> getMentorsByUser();
 }
