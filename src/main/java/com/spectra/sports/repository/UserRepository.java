@@ -45,6 +45,27 @@ public interface UserRepository extends JpaRepository<User, Long> {
     """)
     List<Map<String, Object>> getAllMentorsByAcademy(Long userId, RoleType role, Pageable pageable);
 
+    @Query("""
+            SELECT user from User user where user.userId IN 
+            ( SELECT userMapping.mentorId from UserMapping userMapping WHERE
+                userMapping.academyId = :academyId ) 
+    """)
+    List<User> getAllMentorsByAcademy(Long academyId, Pageable pageable);
+
+    @Query("""
+        SELECT user from User user where user.userId IN 
+        ( SELECT userMapping.mentorId from UserMapping userMapping WHERE
+            userMapping.studentId = :studentId ) 
+    """)
+    List<User> getAllMentorsByStudentId(Long studentId, Pageable pageable);
+
+    @Query("""
+        SELECT user from User user where user.userId IN 
+        ( SELECT userMapping.academyId from UserMapping userMapping WHERE
+            userMapping.studentId = :studentId AND userMapping.academyId IS NOT NULL ) 
+    """)
+    List<User> getAllAcademyByStudentId(Long studentId, Pageable pageable);
+
     @Modifying
     @Query("UPDATE User user set user.isVerified = true WHERE user.userId = :userId")
     int updateUserVerified(Long userId);

@@ -31,19 +31,20 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.spectra.sports.constant.SpectraConstant.*;
 import static com.spectra.sports.entity.RoleType.ACADEMY;
 import static com.spectra.sports.entity.RoleType.MENTOR;
 import static java.util.Objects.nonNull;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private UserMappingRepository userMappingRepository;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private JwtHelper jwtHelper;
-    private EmailService emailService;
-    private UserDao userDao;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserMappingRepository userMappingRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JwtHelper jwtHelper;
+    private final EmailService emailService;
+    private final UserDao userDao;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
@@ -75,7 +76,7 @@ public class UserServiceImpl implements UserService {
             this.sendSignUpEmailOrOtpEmail((userDto) -> emailService.sendSignUpVerificationEmail(userDto), from);
 
             return new SuccessResponse(from, HttpStatus.OK.value(), false, "Sign up SuccessFul");
-        } catch (Exception var5) {
+        } catch (Exception exception) {
             String message = "Duplicate User, Please try with different email or Number";
             return new SuccessResponse(Map.of(), HttpStatus.NOT_ACCEPTABLE.value(), true, message);
         }
@@ -94,7 +95,7 @@ public class UserServiceImpl implements UserService {
         try {
             var user = userRepository.getReferenceById(userId);
             return new SuccessResponse(UserDto.from(user), HttpStatus.OK.value(), false, "Get by User Id");
-        } catch (Exception var3) {
+        } catch (Exception exception) {
             return SuccessResponse.errorResponse(HttpStatus.NOT_FOUND.value(), "User Not Found");
         }
     }
@@ -108,15 +109,15 @@ public class UserServiceImpl implements UserService {
         var nearByUsers = userDao.getAllUsers(latitude, longitude, user.userId());
         var nearByList = nearByUsers.stream().map(UserDto::from).collect(Collectors.toList());
         if( CollectionUtils.isEmpty(nearByUsers) ) {
-            nearByList = getAllUsersByRole("MENTOR", 1, 5);
+            nearByList = getAllUsersByRole(MENTOR.name(), 1, 5);
         }
 
         return SuccessResponse.defaultResponse(nearByList, "Get All Nearby Mentors");
     }
 
     public Map<String, ? extends Object> signInUser(Map<String, String> credentials) throws JsonProcessingException {
-        var username = credentials.get("username");
-        var password = credentials.get("password");
+        var username = credentials.get(USERNAME);
+        var password = credentials.get(PASSWORD);
         var user = this.userRepository.getUserByUserName(username);
 
         if (user == null) {
@@ -131,10 +132,10 @@ public class UserServiceImpl implements UserService {
 
         var from = UserDto.from(user);
         return Map.of(
-            "body", from,
-            "status", HttpStatus.OK.value(),
-            "error", false,
-            "message", "Sign in Succeed",
+            BODY, from,
+            STATUS, HttpStatus.OK.value(),
+            ERROR, false,
+            MESSAGE, "Sign in Succeed",
             "accessToken", jwtHelper.createToken(from)
         );
     }
@@ -185,8 +186,8 @@ public class UserServiceImpl implements UserService {
     }
 
     public SuccessResponse<String> validateOtp(Map<String, String> userDetails) {
-        var email = userDetails.get("email");
-        var otp = userDetails.get("otp");
+        var email = userDetails.get(EMAIL);
+        var otp = userDetails.get(OTP);
         var user = userRepository.getUserByUserName(email);
 
         SuccessResponse defaultResponse = SuccessResponse.defaultResponse(Map.of(), "Valid Otp");
@@ -203,9 +204,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public SuccessResponse<String> resetPassword(Map<String, String> userDetails) {
-        var email = userDetails.get("email");
-        var newPassword = userDetails.get("password");
-        var otp = userDetails.get("otp");
+        var email = userDetails.get(EMAIL);
+        var newPassword = userDetails.get(PASSWORD);
+        var otp = userDetails.get(OTP);
         var user = userRepository.getUserByUserName(email);
 
         return Optional.ofNullable(validateAndGetUser(otp, user))
@@ -218,9 +219,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SuccessResponse<String> updateUserMapping(Map<String, String> userDetails) {
-        var studentId = userDetails.get("studentId");
-        var mentorId = userDetails.get("mentorId");
-        var academyId = userDetails.get("academyId");
+        var studentId = userDetails.get(STUDENT_ID);
+        var mentorId = userDetails.get(MENTOR_ID);
+        var academyId = userDetails.get(ACADEMY_ID);
 
         Function<String, Long> applyDefaultValue = (val) -> {
             if (val == null) return 0l;
@@ -254,13 +255,41 @@ public class UserServiceImpl implements UserService {
         return SuccessResponse.defaultResponse(filterByAcademyOrStudent(mentors, hasAcademy), "Get All Mentors");
     }
 
+    @Override
+    public SuccessResponse<List<UserDto>> getAllMentorsByAcademy() {
+        var currentUserId = UserContextHolder.getUser().userId();
+        var allMentorsByAcademy = userRepository.getAllMentorsByAcademy(currentUserId, PageRequest.of(0, 20));
+        var mapToUserDto = allMentorsByAcademy.stream().map(UserDto::from).collect(Collectors.toList());
+
+        return SuccessResponse.defaultResponse(mapToUserDto, "Get All Mentors By Academy ID");
+    }
+
+    @Override
+    public SuccessResponse<List<UserDto>> getAllMentorsOrAcademyByRole(String roleType) {
+        Assert.notNull(roleType, "Role Type Cannot be null");
+        var role = RoleType.valueOf(roleType);
+        var currentUser = UserContextHolder.getUser().userId();
+        List<User> users = null;
+        var page = PageRequest.of(0, 20);
+
+        if (ACADEMY.equals(role)) {
+            users = userRepository.getAllAcademyByStudentId(currentUser, page);
+        } else {
+            users = userRepository.getAllMentorsByStudentId(currentUser, page);
+        }
+
+        var userDto = users.stream().map(UserDto::from).collect(Collectors.toList());
+
+        return SuccessResponse.defaultResponse(userDto, "Get All Academy/Mentors By Student");
+    }
+
     private List<UserDto> filterByAcademyOrStudent(List<Map<String, Object>> users, boolean hasAcademy) {
         Map<Long, UserDto> bucket = new LinkedHashMap<>();
         for (Map<String, Object> userContext : users) {
             var user = (User) userContext.get("user");
             var flag = (Boolean) userContext.get("flag");
-            var academyId = (Long) userContext.get("academyId");
-            var studentId = (Long) userContext.get("studentId");
+            var academyId = (Long) userContext.get(ACADEMY_ID);
+            var studentId = (Long) userContext.get(STUDENT_ID);
             var existingUser = bucket.get(user.getUserId());
             if (existingUser != null) {
                 var academyOrStudentId = hasAcademy ? academyId : studentId;
@@ -276,7 +305,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private Map<String, ? extends Object> getResponse(int status, String message) {
-        return Map.of("body", Map.of(), "status", status, "error", true, "message", message);
+        return Map.of(BODY, Map.of(), STATUS, status, ERROR, true, MESSAGE, message);
     }
 
     private SuccessResponse validateAndGetUser(String otp, User user) {

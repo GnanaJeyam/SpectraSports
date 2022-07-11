@@ -33,4 +33,8 @@ public interface UserService {
     SuccessResponse<String> updateUserMapping(Map<String, String> userDetails);
 
     SuccessResponse<List<UserDto>> getMentorsByUser();
+
+    SuccessResponse<List<UserDto>> getAllMentorsByAcademy();
+
+    SuccessResponse<List<UserDto>> getAllMentorsOrAcademyByRole(String roleType);
 }

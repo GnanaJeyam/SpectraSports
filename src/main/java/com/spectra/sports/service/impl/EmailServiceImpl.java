@@ -19,23 +19,15 @@ import java.util.Map;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
-import org.springframework.http.RequestEntity.BodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import static com.spectra.sports.constant.SpectraConstant.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @Service
 public class EmailServiceImpl implements EmailService {
-    private static final String SENDER = "sender";
-    private static final String TO = "to";
-    private static final String NAME = "name";
-    private static final String EMAIL = "email";
-    private static final String SUBJECT = "subject";
-    private static final String HTML_CONTENT = "htmlContent";
-    private static final String SENDINBLUE_URL = "https://api.sendinblue.com/v3/smtp/email";
-
-    public static final String DOMAIN = "DOMAIN";
-
     private final RestTemplate restTemplate;
     private final JwtHelper jwtHelper;
     private final UserRepository userRepository;
@@ -109,9 +101,9 @@ public class EmailServiceImpl implements EmailService {
 
     private void sendEmailRequest(String content) {
         RequestEntity<String> accept = RequestEntity
-                .post(URI.create("https://api.sendinblue.com/v3/smtp/email"))
-                .header("accept", new String[]{"application/json"})
-                .header("content-type", new String[]{"application/json"})
+                .post(URI.create(SEND_IN_BLUE_URL))
+                .header("accept", new String[]{APPLICATION_JSON_VALUE})
+                .header("content-type", new String[]{APPLICATION_JSON_VALUE})
                 .header("api-key", new String[]{this.emailApiKey})
                 .body(content);
 
