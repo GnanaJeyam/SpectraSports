@@ -14,6 +14,10 @@ public interface UserService {
 
     SuccessResponse<?> getUserById(Long userId);
 
+    SuccessResponse<UserDto> getMentorDetailById(Long mentorId);
+
+    Map<String, ?> getAcademyDetailById(Long academyId);
+
     SuccessResponse<List<UserDto>> getNearByMentors();
 
     Map<String, ? extends Object> signInUser(Map<String, String> credentials) throws JsonProcessingException;

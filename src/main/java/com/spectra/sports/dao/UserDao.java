@@ -11,12 +11,9 @@ import java.util.List;
 
 @Component
 public class UserDao {
-
-    private final JdbcTemplate jdbcTemplate;
-
     private final static String NEARBY_MENTORS =  """
-        select * FROM ( 
-            select u.* , (
+        SELECT *, false as flag FROM ( 
+            SELECT u.* , (
               6371 * acos (
               cos ( radians( ? ) )
               * cos( radians( u.latitude  ) )
@@ -29,12 +26,26 @@ public class UserDao {
          WHERE output.dist < 15
     """;
 
+    private final static String GET_ALL_MENTORS_BY_ACADEMY_ID = """
+        select u.*, ( case when um.student_id = ? then true else false end ) as flag
+        from users u inner join user_mapping um on u.user_id = um.mentor_id where um.academy_id = ?    
+    """;
+
+    private final UserRowMapper USER_ROW_MAPPER = new UserRowMapper();
+    private final JdbcTemplate jdbcTemplate;
+
     public UserDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<User> getAllUsers(Double latitude, Double longitude, Long userId) {
-        return jdbcTemplate.query(NEARBY_MENTORS, new UserRowMapper(), new Object[] {latitude, longitude, latitude, userId});
+
+        return jdbcTemplate.query(NEARBY_MENTORS, USER_ROW_MAPPER, new Object[] {latitude, longitude, latitude, userId});
+    }
+
+    public List<User> getAllMentorsByAcademyId(Long userId, Long academyId) {
+
+        return jdbcTemplate.query(GET_ALL_MENTORS_BY_ACADEMY_ID, USER_ROW_MAPPER, new Object[]{userId, academyId});
     }
 
     class UserRowMapper implements RowMapper<User> {
@@ -55,6 +66,7 @@ public class UserDao {
             user.setImageName(rs.getString("image_name"));
             String specialistIn = rs.getString("specialistin");
             user.setSpecialistIn(specialistIn.replaceAll("\\{|}", "").split(","));
+            user.setMapped(rs.getBoolean("flag"));
 
             return user;
         }

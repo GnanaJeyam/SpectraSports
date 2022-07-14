@@ -1,6 +1,7 @@
 package com.spectra.sports.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.spectra.sports.constant.SpectraConstant;
 import com.spectra.sports.dao.UserDao;
 import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.Role;
@@ -101,8 +102,48 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public SuccessResponse<UserDto> getMentorDetailById(Long mentorId) {
+        var currentUserId = UserContextHolder.getCurrentUser().userId();
+        var mentorWithMappedFlag = userRepository.getMentorByIdWithCurrentUserMappedFlag(currentUserId, mentorId);
+
+        var mentor = (User) mentorWithMappedFlag.get(USER);
+        var flag = (Boolean) mentorWithMappedFlag.get(FLAG);
+
+        return SuccessResponse.defaultResponse(UserDto.from(mentor, flag), "Get Mentor Detail by mentor id with mapped flag");
+    }
+
+    @Override
+    public Map<String, ?> getAcademyDetailById(Long academyId) {
+        var currentUserId = UserContextHolder.getCurrentUser().userId();
+        var academyIdWithCurrentUserMappedFlag = userRepository.getAcademyIdWithCurrentUserMappedFlag(currentUserId, academyId);
+
+        var academy = (User) academyIdWithCurrentUserMappedFlag.get(USER);
+        var flag = (Boolean) academyIdWithCurrentUserMappedFlag.get(FLAG);
+        var academyDto = UserDto.from(academy, flag);
+        var mentors = userDao.getAllMentorsByAcademyId(currentUserId, academyId).stream();
+        var bucket = new LinkedHashMap<Long, UserDto>();
+        mentors.forEach(user -> {
+            UserDto userDto = bucket.get(user.getUserId());
+            if (userDto != null) {
+                if (user.isMapped()) {
+                    bucket.put(user.getUserId(), UserDto.from(user));
+                }
+            } else {
+                bucket.put(user.getUserId(), UserDto.from(user));
+            }
+        });
+
+        return Map.of(
+            BODY, Map.of(SpectraConstant.ACADEMY, academyDto, SpectraConstant.MENTOR, bucket.values()),
+            STATUS, HttpStatus.OK.value(),
+            ERROR, false,
+            MESSAGE,"Get Academy Detail by academy id with mapped flag"
+        );
+    }
+
+    @Override
     public SuccessResponse<List<UserDto>> getNearByMentors() {
-        var user = UserContextHolder.getUser();
+        var user = UserContextHolder.getCurrentUser();
         var latitude = user.latitude();
         var longitude = user.longitude();
 
@@ -240,7 +281,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SuccessResponse<List<UserDto>> getMentorsByUser() {
-        var currentUser = UserContextHolder.getUser();
+        var currentUser = UserContextHolder.getCurrentUser();
         var currentRole = currentUser.roles().stream().findFirst().orElseThrow();
         var page = PageRequest.of(0, 20);
         var hasAcademy = ACADEMY.equals(currentRole.getRoleType());
@@ -257,7 +298,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SuccessResponse<List<UserDto>> getAllMentorsByAcademy() {
-        var currentUserId = UserContextHolder.getUser().userId();
+        var currentUserId = UserContextHolder.getCurrentUser().userId();
         var allMentorsByAcademy = userRepository.getAllMentorsByAcademy(currentUserId, PageRequest.of(0, 20));
         var mapToUserDto = allMentorsByAcademy.stream().map(UserDto::from).collect(Collectors.toList());
 
@@ -268,7 +309,7 @@ public class UserServiceImpl implements UserService {
     public SuccessResponse<List<UserDto>> getAllMentorsOrAcademyByRole(String roleType) {
         Assert.notNull(roleType, "Role Type Cannot be null");
         var role = RoleType.valueOf(roleType);
-        var currentUser = UserContextHolder.getUser().userId();
+        var currentUser = UserContextHolder.getCurrentUser().userId();
         List<User> users = null;
         var page = PageRequest.of(0, 20);
 
@@ -286,12 +327,17 @@ public class UserServiceImpl implements UserService {
     private List<UserDto> filterByAcademyOrStudent(List<Map<String, Object>> users, boolean hasAcademy) {
         Map<Long, UserDto> bucket = new LinkedHashMap<>();
         for (Map<String, Object> userContext : users) {
-            var user = (User) userContext.get("user");
-            var flag = (Boolean) userContext.get("flag");
+            var user = (User) userContext.get(USER);
+            var flag = (Boolean) userContext.get(FLAG);
             var academyId = (Long) userContext.get(ACADEMY_ID);
             var studentId = (Long) userContext.get(STUDENT_ID);
             var existingUser = bucket.get(user.getUserId());
             if (existingUser != null) {
+                /**
+                 * Doing this deduplication check to confirm whether the mentor has
+                 * duplicate entry due to Student/Academy mapping.
+                 * Removing the duplicate entry based on the hasAcademy flag.
+                */
                 var academyOrStudentId = hasAcademy ? academyId : studentId;
                 if ( nonNull(academyOrStudentId) && academyOrStudentId > 0l ) {
                     bucket.put(user.getUserId(), UserDto.from(user, flag));

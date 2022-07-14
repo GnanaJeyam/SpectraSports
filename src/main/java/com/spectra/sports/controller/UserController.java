@@ -75,6 +75,20 @@ public class UserController {
         return mentorsOrAcademyByStudent;
     }
 
+    @GetMapping({"/detail/mentor/{mentorId}"})
+    SuccessResponse<UserDto> getMentorDetailById(@PathVariable("mentorId") Long mentorId) {
+        var mentorsOrAcademyByStudent = userService.getMentorDetailById(mentorId);
+
+        return mentorsOrAcademyByStudent;
+    }
+
+    @GetMapping({"/detail/academy/{academyId}"})
+    Map<String, ?> getAcademyDetailById(@PathVariable("academyId") Long academyId) {
+        var mentorsOrAcademyByStudent = userService.getAcademyDetailById(academyId);
+
+        return mentorsOrAcademyByStudent;
+    }
+
     @GetMapping({"/all/{role}"})
     SuccessResponse<List<UserDto>> getAllUsersByRole(@PathVariable("role") String role,
                                                     @RequestParam("page") Integer page,

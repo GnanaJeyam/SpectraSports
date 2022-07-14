@@ -17,6 +17,10 @@ public final class SpectraConstant {
     public static final String STATUS = "status";
     public static final String ERROR = "error";
     public static final String MESSAGE = "message";
+    public static final String USER = "user";
+    public static final String FLAG = "flag";
+    public static final String ACADEMY = "academy";
+    public static final String MENTOR = "mentor";
     public static final String SEND_IN_BLUE_URL = "https://api.sendinblue.com/v3/smtp/email";
     public static final String OTP = "otp";
 }

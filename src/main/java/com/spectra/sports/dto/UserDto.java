@@ -12,7 +12,7 @@ public record UserDto(Long userId, String firstName, String lastName, String ema
                       List<Slot> availableSlots, String imageName, String otp, Boolean isMapped) {
 
     public static UserDto from(User user) {
-        return from(user, false);
+        return from(user, user.isMapped());
     }
 
     public static UserDto from(User user, Boolean flag) {

@@ -26,7 +26,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public SuccessResponse<EventDto> addEvent(SportsEvent sportsEvent) {
         Assert.notNull(sportsEvent, "Event cannot be null");
-        var currentUser = UserContextHolder.getUser();
+        var currentUser = UserContextHolder.getCurrentUser();
         sportsEvent.setCreatedBy(currentUser.userId());
 
         var newEvent = eventRepository.save(sportsEvent);
@@ -50,7 +50,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public SuccessResponse<List<EventDto>> getAllEventsByUserId() {
-        var currentUser = UserContextHolder.getUser();
+        var currentUser = UserContextHolder.getCurrentUser();
         var allEventsByCurrentUser = eventRepository.getAllEventsByUserId(currentUser.userId());
         var events = allEventsByCurrentUser.stream().map(EventDto::from).collect(Collectors.toList());
 
@@ -59,7 +59,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public SuccessResponse<List<EventDto>> getAllOngoingEvents() {
-        var currentUser = UserContextHolder.getUser();
+        var currentUser = UserContextHolder.getCurrentUser();
         var allOngoingEvents = eventRepository.getAllOngoingEvents(currentUser.userId());
         var events = allOngoingEvents.stream().map(EventDto::from).collect(Collectors.toList());
 

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.spectra.sports.helper;
 
 import com.spectra.sports.dto.UserDto;
@@ -17,7 +12,7 @@ public class UserContextHolder {
         currentUser.set(userDto);
     }
 
-    public static UserDto getUser() {
-        return (UserDto)currentUser.get();
+    public static UserDto getCurrentUser() {
+        return currentUser.get();
     }
 }

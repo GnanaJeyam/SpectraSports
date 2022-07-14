@@ -53,6 +53,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> getAllMentorsByAcademy(Long academyId, Pageable pageable);
 
     @Query("""
+            SELECT new Map( user as user, CASE WHEN EXISTS ( SELECT userMapping.studentId from UserMapping userMapping   
+            WHERE userMapping.mentorId = :mentorId AND userMapping.studentId = :userId ) THEN true ELSE false END as flag )
+            from User user where user.userId = :mentorId
+    """)
+    Map<String, Object> getMentorByIdWithCurrentUserMappedFlag(Long userId, Long mentorId);
+
+    @Query("""
+            SELECT new Map( user as user, CASE WHEN EXISTS ( SELECT userMapping.studentId from UserMapping userMapping   
+            WHERE userMapping.academyId = :academyId AND userMapping.studentId = :userId ) THEN true ELSE false END as flag )
+            from User user where user.userId = :academyId
+    """)
+    Map<String, Object> getAcademyIdWithCurrentUserMappedFlag(Long userId, Long academyId);
+
+    @Query("""
         SELECT user from User user where user.userId IN 
         ( SELECT userMapping.mentorId from UserMapping userMapping WHERE
             userMapping.studentId = :studentId ) 

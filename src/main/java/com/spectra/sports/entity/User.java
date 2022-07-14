@@ -29,6 +29,9 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long userId;
 
+    @Transient
+    private boolean isMapped;
+
     @Column(name = "first_name", length = 30)
     private String firstName;
 
