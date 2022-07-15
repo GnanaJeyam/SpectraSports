@@ -20,6 +20,8 @@ public interface UserService {
 
     SuccessResponse<List<UserDto>> getNearByMentors();
 
+    SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(Integer page, Integer limit);
+
     Map<String, ? extends Object> signInUser(Map<String, String> credentials) throws JsonProcessingException;
 
     List<UserDto> getAllUsersByRole(String role, Integer page, Integer limit);

@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import static com.spectra.sports.constant.SpectraConstant.*;
 import static com.spectra.sports.entity.RoleType.ACADEMY;
 import static com.spectra.sports.entity.RoleType.MENTOR;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -124,11 +125,7 @@ public class UserServiceImpl implements UserService {
         var bucket = new LinkedHashMap<Long, UserDto>();
         mentors.forEach(user -> {
             UserDto userDto = bucket.get(user.getUserId());
-            if (userDto != null) {
-                if (user.isMapped()) {
-                    bucket.put(user.getUserId(), UserDto.from(user));
-                }
-            } else {
+            if ((nonNull(userDto) && user.isMapped()) || isNull(userDto)) {
                 bucket.put(user.getUserId(), UserDto.from(user));
             }
         });
@@ -154,6 +151,24 @@ public class UserServiceImpl implements UserService {
         }
 
         return SuccessResponse.defaultResponse(nearByList, "Get All Nearby Mentors");
+    }
+
+    @Override
+    public SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(Integer page, Integer limit) {
+        var currentUser = UserContextHolder.getCurrentUser();
+        var academies = userRepository.getAllAcademyWithMappedKey(currentUser.userId(),
+                ACADEMY, PageRequest.of(page - 1, limit));
+        var users = new LinkedHashMap<Long, UserDto>();
+        academies.forEach(record -> {
+            var user = (User) record.get(USER);
+            var flag = (Boolean) record.get(FLAG);
+            var existingUser = users.get(user.getUserId());
+            if ((nonNull(existingUser) && flag) || isNull(existingUser)) {
+                users.put(user.getUserId(), UserDto.from(user, flag));
+            }
+        });
+
+        return SuccessResponse.defaultResponse(users.values(), "Get All Academy with mapped key");
     }
 
     public Map<String, ? extends Object> signInUser(Map<String, String> credentials) throws JsonProcessingException {

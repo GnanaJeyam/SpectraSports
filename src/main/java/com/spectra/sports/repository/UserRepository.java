@@ -46,6 +46,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<Map<String, Object>> getAllMentorsByAcademy(Long userId, RoleType role, Pageable pageable);
 
     @Query("""
+            SELECT new Map( user as user,   
+                ( CASE WHEN userMapping.studentId = :userId
+                THEN true else false END ) as flag )  
+            from User user LEFT JOIN UserMapping userMapping 
+            ON user.userId = userMapping.academyId
+            JOIN user.roles userRoles
+             WHERE userRoles.roleType = :role
+             ORDER BY user.userId DESC  
+    """)
+    List<Map<String, Object>> getAllAcademyWithMappedKey(Long userId, RoleType role, Pageable pageable);
+
+    @Query("""
             SELECT user from User user where user.userId IN 
             ( SELECT userMapping.mentorId from UserMapping userMapping WHERE
                 userMapping.academyId = :academyId ) 

@@ -68,6 +68,14 @@ public class UserController {
         return mentorsByAcademy;
     }
 
+    @GetMapping({"/all/academy"})
+    SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                              @RequestParam(value = "limit",defaultValue = "10") Integer limit) {
+        var mentorsByAcademy = userService.getAllAcademyWithMappedKey(page, limit);
+
+        return mentorsByAcademy;
+    }
+
     @GetMapping({"/roles/{roleType}"})
     SuccessResponse<List<UserDto>> getAllMentorsOrAcademyByRole(@PathVariable("roleType") String roleType) {
         var mentorsOrAcademyByStudent = userService.getAllMentorsOrAcademyByRole(roleType);
