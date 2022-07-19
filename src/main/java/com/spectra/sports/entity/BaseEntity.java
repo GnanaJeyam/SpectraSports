@@ -1,9 +1,6 @@
 package com.spectra.sports.entity;
 
-import com.spectra.sports.helper.UserContextHolder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
