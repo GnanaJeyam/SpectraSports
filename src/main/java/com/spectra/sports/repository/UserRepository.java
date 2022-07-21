@@ -93,6 +93,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """)
     List<User> getAllAcademyByStudentId(Long studentId, Pageable pageable);
 
+    @Query(value = """
+            SELECT usr.* from users usr where ( :searchKey Ilike  any (usr.specialistin) ) limit 20  
+        """, nativeQuery = true)
+    List<User> getAllUsersBySpecialistIn(String searchKey);
+
+    @Query(value = """
+            SELECT usr.* from users usr where ( usr.first_name Ilike %:searchKey% ) limit 20
+        """, nativeQuery = true)
+    List<User> getAllUsersByName(String searchKey);
+
     @Modifying
     @Query("UPDATE User user set user.isVerified = true WHERE user.userId = :userId")
     int updateUserVerified(Long userId);

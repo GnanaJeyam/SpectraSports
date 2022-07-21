@@ -42,5 +42,7 @@ public interface UserService {
 
     SuccessResponse<List<UserDto>> getAllMentorsByAcademy();
 
-    SuccessResponse<List<UserDto>> getAllMentorsOrAcademyByRole(String roleType);
+    SuccessResponse<List<UserDto>> getAllMentorsAndAcademyByStudent();
+
+    SuccessResponse<List<UserDto>> getAllUsersByNameOrSpecialistIn(String search);
 }

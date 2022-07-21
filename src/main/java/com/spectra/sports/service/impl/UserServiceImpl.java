@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.spectra.sports.constant.SpectraConstant.*;
 import static com.spectra.sports.entity.RoleType.ACADEMY;
@@ -321,22 +322,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SuccessResponse<List<UserDto>> getAllMentorsOrAcademyByRole(String roleType) {
-        Assert.notNull(roleType, "Role Type Cannot be null");
-        var role = RoleType.valueOf(roleType);
+    public SuccessResponse<List<UserDto>> getAllMentorsAndAcademyByStudent() {
         var currentUser = UserContextHolder.getCurrentUser().userId();
-        List<User> users = null;
         var page = PageRequest.of(0, 20);
 
-        if (ACADEMY.equals(role)) {
-            users = userRepository.getAllAcademyByStudentId(currentUser, page);
-        } else {
-            users = userRepository.getAllMentorsByStudentId(currentUser, page);
-        }
+        var academys = userRepository.getAllAcademyByStudentId(currentUser, page);
+        var mentors = userRepository.getAllMentorsByStudentId(currentUser, page);
 
-        var userDto = users.stream().map(UserDto::from).collect(Collectors.toList());
+        var result = Map.of(
+                SpectraConstant.ACADEMY, academys.stream().map(user -> UserDto.from(user, true)),
+                SpectraConstant.MENTOR, mentors.stream().map(user -> UserDto.from(user, true))
+        );
 
-        return SuccessResponse.defaultResponse(userDto, "Get All Academy/Mentors By Student");
+        return SuccessResponse.defaultResponse(result, "Get All Academy and Mentors By Student");
+    }
+
+    @Override
+    public SuccessResponse<List<UserDto>> getAllUsersByNameOrSpecialistIn(String search) {
+        var allUsersBySpecialistIn = userRepository.getAllUsersBySpecialistIn(search);
+        var allUsersByName = userRepository.getAllUsersByName(search);
+        var userDtoStream = Stream.of(allUsersBySpecialistIn, allUsersByName)
+                .flatMap(Collection::stream)
+                .distinct()
+                .sorted(Comparator.comparing(User::getUserId))
+                .map(UserDto::from);
+
+        return SuccessResponse.defaultResponse(userDtoStream, "Get All Users by search");
     }
 
     private List<UserDto> filterByAcademyOrStudent(List<Map<String, Object>> users, boolean hasAcademy) {

@@ -76,9 +76,16 @@ public class UserController {
         return mentorsByAcademy;
     }
 
-    @GetMapping({"/roles/{roleType}"})
-    SuccessResponse<List<UserDto>> getAllMentorsOrAcademyByRole(@PathVariable("roleType") String roleType) {
-        var mentorsOrAcademyByStudent = userService.getAllMentorsOrAcademyByRole(roleType);
+    @GetMapping({"/roles/all"})
+    SuccessResponse<List<UserDto>> getAllMentorsAndAcademyByStudent() {
+        var mentorsAndAcademyByStudent = userService.getAllMentorsAndAcademyByStudent();
+
+        return mentorsAndAcademyByStudent;
+    }
+
+    @GetMapping({"/search/{searchKey}"})
+    SuccessResponse<List<UserDto>> retrieveAllUsersBySearchKey(@PathVariable("searchKey") String searchKey) {
+        var mentorsOrAcademyByStudent = userService.getAllUsersByNameOrSpecialistIn(searchKey);
 
         return mentorsOrAcademyByStudent;
     }

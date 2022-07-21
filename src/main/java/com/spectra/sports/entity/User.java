@@ -3,6 +3,7 @@ package com.spectra.sports.entity;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -23,6 +24,7 @@ import java.util.Set;
     @TypeDef( name = "string-array", typeClass = StringArrayType.class)
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY )
