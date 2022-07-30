@@ -4,14 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spectra.sports.constant.SpectraConstant;
 import com.spectra.sports.dao.UserDao;
 import com.spectra.sports.dto.UserDto;
-import com.spectra.sports.entity.Role;
-import com.spectra.sports.entity.RoleType;
-import com.spectra.sports.entity.User;
-import com.spectra.sports.entity.UserMapping;
+import com.spectra.sports.entity.*;
 import com.spectra.sports.helper.JwtHelper;
 import com.spectra.sports.helper.UserContextHolder;
 import com.spectra.sports.mapper.UserMapper;
 import com.spectra.sports.repository.RoleRepository;
+import com.spectra.sports.repository.StudentRatingDetailRepository;
 import com.spectra.sports.repository.UserMappingRepository;
 import com.spectra.sports.repository.UserRepository;
 import com.spectra.sports.response.SuccessResponse;
@@ -29,21 +27,25 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.spectra.sports.constant.SpectraConstant.*;
 import static com.spectra.sports.entity.RoleType.ACADEMY;
 import static com.spectra.sports.entity.RoleType.MENTOR;
+import static com.spectra.sports.response.SuccessResponse.defaultResponse;
+import static com.spectra.sports.response.SuccessResponse.errorResponse;
+import static java.time.DayOfWeek.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMappingRepository userMappingRepository;
+    private final StudentRatingDetailRepository studentRatingDetailRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtHelper jwtHelper;
     private final EmailService emailService;
@@ -53,6 +55,7 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            UserMappingRepository userMappingRepository,
+                           StudentRatingDetailRepository studentRatingDetailRepository,
                            BCryptPasswordEncoder bCryptPasswordEncoder,
                            JwtHelper jwtHelper,
                            EmailService emailService,
@@ -60,6 +63,7 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userMappingRepository = userMappingRepository;
+        this.studentRatingDetailRepository = studentRatingDetailRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtHelper = jwtHelper;
         this.emailService = emailService;
@@ -73,15 +77,15 @@ public class UserServiceImpl implements UserService {
 
         try {
             var createdUser =  userRepository.save(user);
-            var roleIds = (Set)createdUser.getRoles().stream().map(Role::getRoleId).collect(Collectors.toSet());
+            var roleIds = createdUser.getRoles().stream().map(Role::getRoleId).collect(Collectors.toSet());
             user.setRoles(this.roleRepository.getRolesByIds(roleIds));
             var from = UserDto.from(createdUser);
             this.sendSignUpEmailOrOtpEmail((userDto) -> emailService.sendSignUpVerificationEmail(userDto), from);
 
-            return new SuccessResponse(from, HttpStatus.OK.value(), false, "Sign up SuccessFul");
+            return new SuccessResponse<>(from, HttpStatus.OK.value(), false, "Sign up SuccessFul");
         } catch (Exception exception) {
             String message = "Duplicate User, Please try with different email or Number";
-            return new SuccessResponse(Map.of(), HttpStatus.NOT_ACCEPTABLE.value(), true, message);
+            return new SuccessResponse<>(Map.of(), HttpStatus.NOT_ACCEPTABLE.value(), true, message);
         }
     }
 
@@ -91,7 +95,14 @@ public class UserServiceImpl implements UserService {
         user = UserMapper.mapUser(existingUser, user);
         var updatedUser = userRepository.saveAndFlush(user);
 
-        return SuccessResponse.defaultResponse(UserDto.from(updatedUser), "User Updated SuccessFully");
+        return defaultResponse(UserDto.from(updatedUser), "User Updated SuccessFully");
+    }
+
+    @Override
+    public SuccessResponse<?> updateStudentAttendance(StudentRatingDetail studentRatingDetail) {
+        var studentRating = studentRatingDetailRepository.saveAndFlush(studentRatingDetail);
+
+        return defaultResponse(studentRating, "Student attendance details are updated");
     }
 
     public SuccessResponse<?> getUserById(Long userId) {
@@ -99,7 +110,7 @@ public class UserServiceImpl implements UserService {
             var user = userRepository.getReferenceById(userId);
             return new SuccessResponse(UserDto.from(user), HttpStatus.OK.value(), false, "Get by User Id");
         } catch (Exception exception) {
-            return SuccessResponse.errorResponse(HttpStatus.NOT_FOUND.value(), "User Not Found");
+            return errorResponse(HttpStatus.NOT_FOUND.value(), "User Not Found");
         }
     }
 
@@ -111,7 +122,7 @@ public class UserServiceImpl implements UserService {
         var mentor = (User) mentorWithMappedFlag.get(USER);
         var flag = (Boolean) mentorWithMappedFlag.get(FLAG);
 
-        return SuccessResponse.defaultResponse(UserDto.from(mentor, flag), "Get Mentor Detail by mentor id with mapped flag");
+        return defaultResponse(UserDto.from(mentor, flag), "Get Mentor Detail by mentor id with mapped flag");
     }
 
     @Override
@@ -151,7 +162,7 @@ public class UserServiceImpl implements UserService {
             nearByList = getAllUsersByRole(MENTOR.name(), 1, 5);
         }
 
-        return SuccessResponse.defaultResponse(nearByList, "Get All Nearby Mentors");
+        return defaultResponse(nearByList, "Get All Nearby Mentors");
     }
 
     @Override
@@ -169,7 +180,7 @@ public class UserServiceImpl implements UserService {
             }
         });
 
-        return SuccessResponse.defaultResponse(users.values(), "Get All Academy with mapped key");
+        return defaultResponse(users.values(), "Get All Academy with mapped key");
     }
 
     public Map<String, ? extends Object> signInUser(Map<String, String> credentials) throws JsonProcessingException {
@@ -233,13 +244,13 @@ public class UserServiceImpl implements UserService {
     public SuccessResponse<String> sendEmailOtp(String email) {
         var user = userRepository.getUserByUserName(email);
         if (user == null) {
-            return SuccessResponse.errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Invalid Username or Email.");
+            return errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Invalid Username or Email.");
         }
 
         UserDto from = UserDto.from(user);
         sendSignUpEmailOrOtpEmail((userDto) -> emailService.sendForgotPasswordVerificationEmail(userDto), from);
 
-        return SuccessResponse.defaultResponse(Map.of(), "Otp Sent to the User");
+        return defaultResponse(Map.of(), "Otp Sent to the User");
     }
 
     public SuccessResponse<String> validateOtp(Map<String, String> userDetails) {
@@ -247,8 +258,8 @@ public class UserServiceImpl implements UserService {
         var otp = userDetails.get(OTP);
         var user = userRepository.getUserByUserName(email);
 
-        SuccessResponse defaultResponse = SuccessResponse.defaultResponse(Map.of(), "Valid Otp");
-        return Optional.ofNullable(validateAndGetUser(otp, user)).orElse(defaultResponse);
+        SuccessResponse defaultResponse = defaultResponse(Map.of(), "Valid Otp");
+        return ofNullable(validateAndGetUser(otp, user)).orElse(defaultResponse);
     }
 
     public SuccessResponse<String> resendVerificationEmail(String email) {
@@ -256,7 +267,7 @@ public class UserServiceImpl implements UserService {
         var from = UserDto.from(user);
         emailService.sendSignUpVerificationEmail(from);
 
-        return SuccessResponse.defaultResponse(Map.of(), "Verification Email Sent");
+        return defaultResponse(Map.of(), "Verification Email Sent");
     }
 
     @Transactional
@@ -266,33 +277,30 @@ public class UserServiceImpl implements UserService {
         var otp = userDetails.get(OTP);
         var user = userRepository.getUserByUserName(email);
 
-        return Optional.ofNullable(validateAndGetUser(otp, user))
+        return ofNullable(validateAndGetUser(otp, user))
             .orElseGet(() -> {
                 user.setPassword(bCryptPasswordEncoder.encode(newPassword));
                 userRepository.saveAndFlush(user);
-                return SuccessResponse.defaultResponse(Map.of(), "Password Updated");
+                return defaultResponse(Map.of(), "Password Updated");
         });
     }
 
     @Override
     public SuccessResponse<String> updateUserMapping(Map<String, String> userDetails) {
-        var studentId = userDetails.get(STUDENT_ID);
-        var mentorId = userDetails.get(MENTOR_ID);
-        var academyId = userDetails.get(ACADEMY_ID);
-
-        Function<String, Long> applyDefaultValue = (val) -> {
-            if (val == null) return 0l;
-            return Long.valueOf(val);
-        };
+        var zero = "0";
+        var studentId = Long.valueOf(ofNullable(userDetails.get(STUDENT_ID)).orElse(zero));
+        var mentorId = Long.valueOf(ofNullable(userDetails.get(MENTOR_ID)).orElse(zero));
+        var academyId = Long.valueOf(ofNullable(userDetails.get(ACADEMY_ID)).orElse(zero));
 
         var userMapping = new UserMapping();
-        userMapping.setStudentId(applyDefaultValue.apply(studentId));
-        userMapping.setAcademyId(applyDefaultValue.apply(academyId));
-        userMapping.setMentorId(applyDefaultValue.apply(mentorId));
+        userMapping.setStudentId(studentId);
+        userMapping.setAcademyId(academyId);
+        userMapping.setMentorId(mentorId);
 
         userMappingRepository.save(userMapping);
+        new Thread(() -> updateStudentRatingDetails(mentorId, studentId)).start();
 
-        return SuccessResponse.defaultResponse(Map.of(), "User Mapping Added");
+        return defaultResponse(Map.of(), "User Mapping Added");
     }
 
     @Override
@@ -309,7 +317,14 @@ public class UserServiceImpl implements UserService {
             mentors = userRepository.getAllMentorsByStudent(currentUser.userId(), MENTOR, page);
         }
 
-        return SuccessResponse.defaultResponse(filterByAcademyOrStudent(mentors, hasAcademy), "Get All Mentors");
+        return defaultResponse(filterByAcademyOrStudent(mentors, hasAcademy), "Get All Mentors");
+    }
+
+    @Override
+    public SuccessResponse<List<StudentRatingDetail>> getAllStudentAttendanceByMentorId(Long mentorId) {
+        var studentAttendanceDetailsByMentorId = studentRatingDetailRepository.getAllStudentAttendanceDetailsByMentorId(mentorId);
+
+        return defaultResponse(studentAttendanceDetailsByMentorId, "Get All students attendance detail by mentor id");
     }
 
     @Override
@@ -318,7 +333,7 @@ public class UserServiceImpl implements UserService {
         var allMentorsByAcademy = userRepository.getAllMentorsByAcademy(currentUserId, PageRequest.of(0, 20));
         var mapToUserDto = allMentorsByAcademy.stream().map(UserDto::from).collect(Collectors.toList());
 
-        return SuccessResponse.defaultResponse(mapToUserDto, "Get All Mentors By Academy ID");
+        return defaultResponse(mapToUserDto, "Get All Mentors By Academy ID");
     }
 
     @Override
@@ -326,15 +341,15 @@ public class UserServiceImpl implements UserService {
         var currentUser = UserContextHolder.getCurrentUser().userId();
         var page = PageRequest.of(0, 20);
 
-        var academys = userRepository.getAllAcademyByStudentId(currentUser, page);
+        var academies = userRepository.getAllAcademyByStudentId(currentUser, page);
         var mentors = userRepository.getAllMentorsByStudentId(currentUser, page);
 
         var result = Map.of(
-                SpectraConstant.ACADEMY, academys.stream().map(user -> UserDto.from(user, true)),
-                SpectraConstant.MENTOR, mentors.stream().map(user -> UserDto.from(user, true))
+            SpectraConstant.ACADEMY, academies.stream().map(user -> UserDto.from(user, true)),
+            SpectraConstant.MENTOR, mentors.stream().map(user -> UserDto.from(user, true))
         );
 
-        return SuccessResponse.defaultResponse(result, "Get All Academy and Mentors By Student");
+        return defaultResponse(result, "Get All Academy and Mentors By Student");
     }
 
     @Override
@@ -347,7 +362,7 @@ public class UserServiceImpl implements UserService {
                 .sorted(Comparator.comparing(User::getUserId))
                 .map(UserDto::from);
 
-        return SuccessResponse.defaultResponse(userDtoStream, "Get All Users by search");
+        return defaultResponse(userDtoStream, "Get All Users by search");
     }
 
     private List<UserDto> filterByAcademyOrStudent(List<Map<String, Object>> users, boolean hasAcademy) {
@@ -376,16 +391,41 @@ public class UserServiceImpl implements UserService {
         return bucket.values().stream().toList();
     }
 
+    private void updateStudentRatingDetails(Long mentorId, Long studentId) {
+        if (studentId < 1) {
+            return;
+        }
+
+        var user = userRepository.findById(studentId).orElseThrow();
+        var studentRatingDetail = new StudentRatingDetail();
+        studentRatingDetail.setRating("0/10");
+        studentRatingDetail.setFullName(user.getFirstName() + " " + user.getLastName());
+        studentRatingDetail.setMentorId(mentorId);
+        studentRatingDetail.setStudentId(studentId);
+        studentRatingDetail.setCreatedBy(mentorId);
+        studentRatingDetail.setAttendances(List.of(
+            Attendance.builder().day(SUNDAY.name()).build(),
+            Attendance.builder().day(MONDAY.name()).build(),
+            Attendance.builder().day(TUESDAY.name()).build(),
+            Attendance.builder().day(WEDNESDAY.name()).build(),
+            Attendance.builder().day(THURSDAY.name()).build(),
+            Attendance.builder().day(FRIDAY.name()).build(),
+            Attendance.builder().day(SATURDAY.name()).build()
+        ));
+
+        studentRatingDetailRepository.save(studentRatingDetail);
+    }
+
     private Map<String, ? extends Object> getResponse(int status, String message) {
         return Map.of(BODY, Map.of(), STATUS, status, ERROR, true, MESSAGE, message);
     }
 
     private SuccessResponse validateAndGetUser(String otp, User user) {
         if (user == null) {
-            return SuccessResponse.errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Invalid Username or Email.");
+            return errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Invalid Username or Email.");
         }
         if (!Objects.equals(user.getOtp(), otp)){
-            return SuccessResponse.errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Invalid otp");
+            return errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Invalid otp");
         }
 
         return null;

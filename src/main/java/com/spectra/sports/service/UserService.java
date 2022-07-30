@@ -2,6 +2,7 @@ package com.spectra.sports.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spectra.sports.dto.UserDto;
+import com.spectra.sports.entity.StudentRatingDetail;
 import com.spectra.sports.entity.User;
 import com.spectra.sports.response.SuccessResponse;
 import java.util.List;
@@ -11,6 +12,8 @@ public interface UserService {
     SuccessResponse<?> addUser(User user);
 
     SuccessResponse<?> updateUser(User user);
+
+    SuccessResponse<?> updateStudentAttendance(StudentRatingDetail studentRatingDetail);
 
     SuccessResponse<?> getUserById(Long userId);
 
@@ -22,7 +25,7 @@ public interface UserService {
 
     SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(Integer page, Integer limit);
 
-    Map<String, ? extends Object> signInUser(Map<String, String> credentials) throws JsonProcessingException;
+    Map<String, ?> signInUser(Map<String, String> credentials) throws JsonProcessingException;
 
     List<UserDto> getAllUsersByRole(String role, Integer page, Integer limit);
 
@@ -39,6 +42,8 @@ public interface UserService {
     SuccessResponse<String> updateUserMapping(Map<String, String> userDetails);
 
     SuccessResponse<List<UserDto>> getMentorsByUser();
+
+    SuccessResponse<List<StudentRatingDetail>> getAllStudentAttendanceByMentorId(Long mentorId);
 
     SuccessResponse<List<UserDto>> getAllMentorsByAcademy();
 

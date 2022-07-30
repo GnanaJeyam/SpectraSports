@@ -1,12 +1,14 @@
 package com.spectra.sports.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "user_mapping")
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class UserMapping extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

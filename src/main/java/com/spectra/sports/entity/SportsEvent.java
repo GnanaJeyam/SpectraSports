@@ -2,6 +2,7 @@ package com.spectra.sports.entity;
 
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 @TypeDefs({
     @TypeDef( name = "string-array", typeClass = StringArrayType.class)
 })
+@EqualsAndHashCode(callSuper=false)
 @Data
 public class SportsEvent extends BaseEntity {
     @Id

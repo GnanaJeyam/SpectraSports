@@ -2,6 +2,7 @@ package com.spectra.sports.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spectra.sports.dto.UserDto;
+import com.spectra.sports.entity.StudentRatingDetail;
 import com.spectra.sports.entity.User;
 import com.spectra.sports.response.SuccessResponse;
 import com.spectra.sports.service.S3Service;
@@ -97,6 +98,13 @@ public class UserController {
         return mentorsOrAcademyByStudent;
     }
 
+    @GetMapping({"/student/attendance/{mentorId}"})
+    SuccessResponse<List<StudentRatingDetail>> getAllStudentAttendanceByMentorId(@PathVariable("mentorId") Long mentorId) {
+        var allStudentAttendanceByMentorId = userService.getAllStudentAttendanceByMentorId(mentorId);
+
+        return allStudentAttendanceByMentorId;
+    }
+
     @GetMapping({"/detail/academy/{academyId}"})
     Map<String, ?> getAcademyDetailById(@PathVariable("academyId") Long academyId) {
         var mentorsOrAcademyByStudent = userService.getAcademyDetailById(academyId);
@@ -160,6 +168,13 @@ public class UserController {
         var updatedUser = userService.updateUser(user);
 
         return updatedUser;
+    }
+
+    @PutMapping({"/update/student/attendance"})
+    SuccessResponse<?> updateStudentAttendance(@RequestBody StudentRatingDetail studentRatingDetail) {
+        var updatedStudentDetail = userService.updateStudentAttendance(studentRatingDetail);
+
+        return updatedStudentDetail;
     }
 
     @PutMapping({"/update-mapping"})
