@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -35,6 +36,7 @@ import static com.spectra.sports.entity.RoleType.ACADEMY;
 import static com.spectra.sports.entity.RoleType.MENTOR;
 import static com.spectra.sports.response.SuccessResponse.defaultResponse;
 import static com.spectra.sports.response.SuccessResponse.errorResponse;
+import static com.spectra.sports.util.NumberUtil.toLong;
 import static java.time.DayOfWeek.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -80,7 +82,7 @@ public class UserServiceImpl implements UserService {
             var roleIds = createdUser.getRoles().stream().map(Role::getRoleId).collect(Collectors.toSet());
             user.setRoles(this.roleRepository.getRolesByIds(roleIds));
             var from = UserDto.from(createdUser);
-            this.sendSignUpEmailOrOtpEmail((userDto) -> emailService.sendSignUpVerificationEmail(userDto), from);
+            this.sendSignUpEmailOrOtpEmail(emailService::sendSignUpVerificationEmail, from);
 
             return new SuccessResponse<>(from, HttpStatus.OK.value(), false, "Sign up SuccessFul");
         } catch (Exception exception) {
@@ -108,7 +110,7 @@ public class UserServiceImpl implements UserService {
     public SuccessResponse<?> getUserById(Long userId) {
         try {
             var user = userRepository.getReferenceById(userId);
-            return new SuccessResponse(UserDto.from(user), HttpStatus.OK.value(), false, "Get by User Id");
+            return new SuccessResponse<>(UserDto.from(user), HttpStatus.OK.value(), false, "Get by User Id");
         } catch (Exception exception) {
             return errorResponse(HttpStatus.NOT_FOUND.value(), "User Not Found");
         }
@@ -285,22 +287,42 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+    /**
+     * 1. User mapped with mentor with academy
+     * 2. User mapped with mentor without academy
+     * 3. Mentor mapped with academy
+     * @param userDetails
+     * @return
+     */
+
     @Override
     public SuccessResponse<String> updateUserMapping(Map<String, String> userDetails) {
-        var zero = "0";
-        var studentId = Long.valueOf(ofNullable(userDetails.get(STUDENT_ID)).orElse(zero));
-        var mentorId = Long.valueOf(ofNullable(userDetails.get(MENTOR_ID)).orElse(zero));
-        var academyId = Long.valueOf(ofNullable(userDetails.get(ACADEMY_ID)).orElse(zero));
+        var studentId = toLong(userDetails.get(STUDENT_ID));
+        var mentorId = toLong(userDetails.get(MENTOR_ID));
+        var academyId = toLong(userDetails.get(ACADEMY_ID));
 
         var userMapping = new UserMapping();
         userMapping.setStudentId(studentId);
         userMapping.setAcademyId(academyId);
         userMapping.setMentorId(mentorId);
+        userMapping.setExpired(false);
 
+        if (0 < studentId) {
+            updateSubscriptionDetails(userDetails, userMapping);
+            new Thread(() -> updateStudentRatingDetails(mentorId, studentId)).start();
+        }
         userMappingRepository.save(userMapping);
-        new Thread(() -> updateStudentRatingDetails(mentorId, studentId)).start();
 
         return defaultResponse(Map.of(), "User Mapping Added");
+    }
+
+    private void updateSubscriptionDetails(Map<String, String> userDetails, UserMapping userMapping) {
+        var totalMonths = toLong(userDetails.get(MONTHS));
+        var todayDate = LocalDate.now();
+        var expiryDate = todayDate.plusMonths(totalMonths);
+
+        userMapping.setStartDate(todayDate);
+        userMapping.setEndDate(expiryDate);
     }
 
     @Override
@@ -392,10 +414,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateStudentRatingDetails(Long mentorId, Long studentId) {
-        if (studentId < 1) {
-            return;
-        }
-
         var user = userRepository.findById(studentId).orElseThrow();
         var studentRatingDetail = new StudentRatingDetail();
         studentRatingDetail.setRating("0/10");

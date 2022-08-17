@@ -10,6 +10,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class User extends BaseEntity {
             @JoinColumn(name = "role_id")
        }
     )
-    private Set<Role> roles = new HashSet();
+    private Set<Role> roles = new HashSet<>();
 
     @Column(name = "location", length = 30)
     private String location;
@@ -87,8 +88,8 @@ public class User extends BaseEntity {
     private String[] specialistIn;
 
     @Type(type = "json")
-    @Column(name = "available_slots", columnDefinition = "json")
-    private List<Slot> availableSlots;
+    @Column(name = "available_slots", columnDefinition = "jsonb")
+    private List<Slot> availableSlots = new ArrayList<>();
 
     @Column(name = "image_name", length = 250)
     private String imageName;

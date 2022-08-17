@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "user_mapping")
@@ -26,4 +27,13 @@ public class UserMapping extends BaseEntity {
 
     @Column(name = "sport_type")
     private String sportType;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
+
+    @Column(name = "expired")
+    private Boolean expired;
 }

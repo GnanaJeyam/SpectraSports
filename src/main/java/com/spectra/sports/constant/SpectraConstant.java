@@ -23,4 +23,5 @@ public final class SpectraConstant {
     public static final String MENTOR = "mentor";
     public static final String SEND_IN_BLUE_URL = "https://api.sendinblue.com/v3/smtp/email";
     public static final String OTP = "otp";
+    public static final String MONTHS = "months";
 }

@@ -9,5 +9,5 @@ import java.util.List;
 public class Slot implements Serializable {
     private String day;
     private List<SlotDetail> slots;
-    private boolean isSelected;
+    private boolean selected;
 }

@@ -7,5 +7,5 @@ import java.io.Serializable;
 @Data
 public class SlotDetail implements Serializable {
     private String time;
-    private boolean isSelected;
+    private boolean checked;
 }

@@ -1,8 +1,11 @@
 package com.spectra.sports.mapper;
 
+import com.spectra.sports.entity.Slot;
 import com.spectra.sports.entity.User;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 import static java.util.Optional.ofNullable;
 
@@ -26,10 +29,18 @@ public final class UserMapper {
         dest.setUserId(ofNullable(dest.getUserId()).orElse(source.getUserId()));
         dest.setCreatedBy(ofNullable(dest.getCreatedBy()).orElse(source.getCreatedBy()));
         dest.setRoles(CollectionUtils.isEmpty(dest.getRoles()) ? source.getRoles() : dest.getRoles());
-        dest.setAvailableSlots(CollectionUtils.isEmpty(dest.getAvailableSlots()) ? source.getAvailableSlots(): dest.getAvailableSlots());
+        dest.setAvailableSlots(getUpdatedAvailableSlot(source.getAvailableSlots(), dest.getAvailableSlots()));
         dest.setCreatedAt(ofNullable(dest.getCreatedAt()).orElse(source.getCreatedAt()));
         dest.setUpdatedBy(dest.getUserId());
 
         return dest;
+    }
+
+    private static List<Slot> getUpdatedAvailableSlot(List<Slot> oldSlots, List<Slot> newSlots) {
+        if (CollectionUtils.isEmpty(newSlots)) {
+            return oldSlots;
+        }
+
+        return newSlots;
     }
 }
