@@ -28,6 +28,12 @@ public class UserMapping extends BaseEntity {
     @Column(name = "sport_type")
     private String sportType;
 
+    @Column(name = "plan_info")
+    private String plan;
+
+    @Column(name = "amount")
+    private Double amount;
+
     @Column(name = "start_date")
     private LocalDate startDate;
 

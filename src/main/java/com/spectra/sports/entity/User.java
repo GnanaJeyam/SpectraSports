@@ -1,5 +1,6 @@
 package com.spectra.sports.entity;
 
+import com.spectra.sports.subscription.SubscriptionInfo;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Data;
@@ -34,6 +35,9 @@ public class User extends BaseEntity {
 
     @Transient
     private boolean isMapped;
+
+    @Transient
+    private SubscriptionInfo subscriptionInfo;
 
     @Column(name = "first_name", length = 30)
     private String firstName;

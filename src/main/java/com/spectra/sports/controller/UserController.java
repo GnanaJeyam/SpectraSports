@@ -84,6 +84,13 @@ public class UserController {
         return mentorsAndAcademyByStudent;
     }
 
+    @GetMapping({"/mentor/students"})
+    SuccessResponse<List<UserDto>> getAllStudentByMentorId() {
+        var mentorsAndAcademyByStudent = userService.getAllStudentByMentorId();
+
+        return mentorsAndAcademyByStudent;
+    }
+
     @GetMapping({"/search/{searchKey}"})
     SuccessResponse<List<UserDto>> retrieveAllUsersBySearchKey(@PathVariable("searchKey") String searchKey) {
         var mentorsOrAcademyByStudent = userService.getAllUsersByNameOrSpecialistIn(searchKey);

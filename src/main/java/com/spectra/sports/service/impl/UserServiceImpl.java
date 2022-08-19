@@ -15,6 +15,7 @@ import com.spectra.sports.repository.UserRepository;
 import com.spectra.sports.response.SuccessResponse;
 import com.spectra.sports.service.EmailService;
 import com.spectra.sports.service.UserService;
+import com.spectra.sports.subscription.SubscriptionInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -37,6 +38,7 @@ import static com.spectra.sports.entity.RoleType.MENTOR;
 import static com.spectra.sports.response.SuccessResponse.defaultResponse;
 import static com.spectra.sports.response.SuccessResponse.errorResponse;
 import static com.spectra.sports.util.NumberUtil.toLong;
+import static java.lang.Boolean.TRUE;
 import static java.time.DayOfWeek.*;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -168,6 +170,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public SuccessResponse<List<UserDto>> getAllStudentByMentorId() {
+        var mentorId = UserContextHolder.getCurrentUser().userId();
+        var mentorMappings = userMappingRepository.getAllStudentsByMentorId(mentorId);
+        var mentorInfo = new HashMap<Long, SubscriptionInfo>();
+        mentorMappings.forEach( userMapping -> {
+            var expired = Objects.isNull(userMapping.getExpired()) ? TRUE : userMapping.getExpired();
+            var subscriptionInfo = new SubscriptionInfo(userMapping.getStartDate(), userMapping.getEndDate(),
+                    expired, userMapping.getPlan(), userMapping.getAmount());
+            mentorInfo.put(userMapping.getStudentId(), subscriptionInfo);
+        });
+
+        var mentors = userRepository.findAllById(mentorInfo.keySet());
+        var updatedMentor = mentors.stream().map(user -> {
+            user.setSubscriptionInfo(mentorInfo.get(user.getUserId()));
+
+            return UserDto.from(user, true);
+        });
+
+        return defaultResponse(updatedMentor, "Get All Nearby Mentors");
+    }
+
+    @Override
     public SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(Integer page, Integer limit) {
         var currentUser = UserContextHolder.getCurrentUser();
         var academies = userRepository.getAllAcademyWithMappedKey(currentUser.userId(),
@@ -190,7 +214,7 @@ public class UserServiceImpl implements UserService {
         var password = credentials.get(PASSWORD);
         var user = this.userRepository.getUserByUserName(username);
 
-        if (user == null) {
+        if (isNull(user)) {
             return getResponse(HttpStatus.UNAUTHORIZED.value(), "Invalid User");
         }
         if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
@@ -320,9 +344,13 @@ public class UserServiceImpl implements UserService {
         var totalMonths = toLong(userDetails.get(MONTHS));
         var todayDate = LocalDate.now();
         var expiryDate = todayDate.plusMonths(totalMonths);
+        var plan = userDetails.get(PLAN);
+        var amount = Double.valueOf(userDetails.get(AMOUNT));
 
         userMapping.setStartDate(todayDate);
         userMapping.setEndDate(expiryDate);
+        userMapping.setPlan(plan);
+        userMapping.setAmount(amount);
     }
 
     @Override
@@ -360,15 +388,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SuccessResponse<List<UserDto>> getAllMentorsAndAcademyByStudent() {
-        var currentUser = UserContextHolder.getCurrentUser().userId();
-        var page = PageRequest.of(0, 20);
+        var currentUserId = UserContextHolder.getCurrentUser().userId();
+        var page = PageRequest.of(0, 30);
 
-        var academies = userRepository.getAllAcademyByStudentId(currentUser, page);
-        var mentors = userRepository.getAllMentorsByStudentId(currentUser, page);
+        var academies = userRepository.getAllAcademyByStudentId(currentUserId, page);
+        var mentors = getAllMentorsByStudentId(currentUserId);
 
         var result = Map.of(
             SpectraConstant.ACADEMY, academies.stream().map(user -> UserDto.from(user, true)),
-            SpectraConstant.MENTOR, mentors.stream().map(user -> UserDto.from(user, true))
+            SpectraConstant.MENTOR, mentors
         );
 
         return defaultResponse(result, "Get All Academy and Mentors By Student");
@@ -387,6 +415,26 @@ public class UserServiceImpl implements UserService {
         return defaultResponse(userDtoStream, "Get All Users by search");
     }
 
+    private Stream<UserDto> getAllMentorsByStudentId(Long studentId) {
+        var mentorMappings = userMappingRepository.getAllUserMappingsByStudentId(studentId);
+        var mentorInfo = new HashMap<Long, SubscriptionInfo>();
+        mentorMappings.forEach( userMapping -> {
+            var expired = Objects.isNull(userMapping.getExpired()) ? TRUE : userMapping.getExpired();
+            var subscriptionInfo = new SubscriptionInfo(userMapping.getStartDate(), userMapping.getEndDate(),
+                    expired, userMapping.getPlan(), userMapping.getAmount());
+            mentorInfo.put(userMapping.getMentorId(), subscriptionInfo);
+        });
+
+        var mentors = userRepository.findAllById(mentorInfo.keySet());
+        var updatedMentor = mentors.stream().map(user -> {
+            user.setSubscriptionInfo(mentorInfo.get(user.getUserId()));
+
+            return UserDto.from(user, true);
+        });
+
+        return updatedMentor;
+    }
+
     private List<UserDto> filterByAcademyOrStudent(List<Map<String, Object>> users, boolean hasAcademy) {
         Map<Long, UserDto> bucket = new LinkedHashMap<>();
         for (Map<String, Object> userContext : users) {
@@ -395,7 +443,7 @@ public class UserServiceImpl implements UserService {
             var academyId = (Long) userContext.get(ACADEMY_ID);
             var studentId = (Long) userContext.get(STUDENT_ID);
             var existingUser = bucket.get(user.getUserId());
-            if (existingUser != null) {
+            if (nonNull(existingUser)) {
                 /**
                  * Doing this deduplication check to confirm whether the mentor has
                  * duplicate entry due to Student/Academy mapping.
@@ -439,7 +487,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private SuccessResponse validateAndGetUser(String otp, User user) {
-        if (user == null) {
+        if (isNull(user)) {
             return errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), "Invalid Username or Email.");
         }
         if (!Objects.equals(user.getOtp(), otp)){

@@ -19,7 +19,7 @@ public class SpectraSportsScheduler {
         this.userMappingRepository = userMappingRepository;
     }
 
-    @Scheduled(cron = "0 0 23 * * ?")
+    @Scheduled(cron = "0 0 */12 * * ?")
     public void updateExpiryFlag() {
         var now = LocalDate.now();
         var allExpiryPlans = userMappingRepository.getAllExpiryPlans(now);
@@ -30,7 +30,7 @@ public class SpectraSportsScheduler {
                         userMapping.setExpired(true);
                         return userMapping;
                     }).collect(Collectors.toList());
-
+            log.info("Updating the Expiry status......");
             userMappingRepository.saveAll(updatedMapping);
         }
     }

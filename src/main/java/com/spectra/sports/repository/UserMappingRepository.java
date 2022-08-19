@@ -14,4 +14,14 @@ public interface UserMappingRepository extends JpaRepository<UserMapping, Long> 
         AND userMapping.endDate < :date AND userMapping.expired <> true 
     """)
     List<UserMapping> getAllExpiryPlans(LocalDate date);
+
+    @Query("""
+        SELECT userMapping from UserMapping userMapping WHERE userMapping.studentId = :studentId        
+    """)
+    List<UserMapping> getAllUserMappingsByStudentId(Long studentId);
+
+    @Query("""
+        SELECT userMapping from UserMapping userMapping WHERE userMapping.mentorId = :mentorId       
+    """)
+    List<UserMapping> getAllStudentsByMentorId(Long mentorId);
 }

@@ -23,6 +23,8 @@ public interface UserService {
 
     SuccessResponse<List<UserDto>> getNearByMentors();
 
+    SuccessResponse<List<UserDto>> getAllStudentByMentorId();
+
     SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(Integer page, Integer limit);
 
     Map<String, ?> signInUser(Map<String, String> credentials) throws JsonProcessingException;
