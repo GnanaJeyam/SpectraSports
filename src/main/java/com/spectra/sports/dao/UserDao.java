@@ -25,7 +25,6 @@ public class UserDao {
             u.user_id <> ? ) as output 
          WHERE output.dist < 15
     """;
-
     private final static String GET_ALL_MENTORS_BY_ACADEMY_ID = """
         select u.*, ( case when um.student_id = ? then true else false end ) as flag
         from users u inner join user_mapping um on u.user_id = um.mentor_id where um.academy_id = ?    

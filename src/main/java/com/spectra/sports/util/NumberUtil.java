@@ -1,5 +1,7 @@
 package com.spectra.sports.util;
 
+import static java.util.Objects.isNull;
+
 public final class NumberUtil {
 
     private NumberUtil() {
@@ -7,9 +9,8 @@ public final class NumberUtil {
     }
 
     public static Long toLong(String number) {
-        if (number == null) {
-            var zero = 0l;
-            return zero;
+        if (isNull(number)) {
+            return 0l;
         }
 
         return Long.valueOf(number);

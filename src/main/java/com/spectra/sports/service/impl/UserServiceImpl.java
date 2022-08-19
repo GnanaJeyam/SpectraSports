@@ -163,7 +163,10 @@ public class UserServiceImpl implements UserService {
         var nearByUsers = userDao.getAllUsers(latitude, longitude, user.userId());
         var nearByList = nearByUsers.stream().map(UserDto::from).collect(Collectors.toList());
         if( CollectionUtils.isEmpty(nearByUsers) ) {
-            nearByList = getAllUsersByRole(MENTOR.name(), 1, 5);
+            nearByList = getAllUsersByRole(MENTOR.name(), 1, 5)
+                    .stream()
+                    .filter(userDto -> userDto.userId() != user.userId())
+                    .collect(Collectors.toList());
         }
 
         return defaultResponse(nearByList, "Get All Nearby Mentors");
