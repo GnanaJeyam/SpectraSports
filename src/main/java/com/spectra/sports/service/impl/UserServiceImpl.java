@@ -223,7 +223,8 @@ public class UserServiceImpl implements UserService {
             var user = (User) record.get(USER);
             var flag = (Boolean) record.get(FLAG);
             var existingUser = users.get(user.getUserId());
-            if ((nonNull(existingUser) && flag) || isNull(existingUser)) {
+            var shouldNotBeSameUser = !currentUser.userId().equals(user.getUserId());
+            if (((nonNull(existingUser) && flag ) || isNull(existingUser)) && shouldNotBeSameUser) {
                 users.put(user.getUserId(), UserDto.from(user, flag));
             }
         });
