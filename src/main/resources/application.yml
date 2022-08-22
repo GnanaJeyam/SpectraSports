@@ -3,6 +3,10 @@ server:
     include-message: always
 
 spring:
+  servlet:
+    multipart:
+      maxFileSize: 10MB
+      maxRequestSize: 10MB
   appplication:
     name: SpectraSports
   datasource:
