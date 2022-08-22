@@ -25,10 +25,6 @@ public class UserDao {
             u.user_id <> ? ) as output 
          WHERE output.dist < 15
     """;
-    private final static String GET_ALL_MENTORS_BY_ACADEMY_ID = """
-        select u.*, ( case when um.student_id = ? then true else false end ) as flag
-        from users u inner join user_mapping um on u.user_id = um.mentor_id where um.academy_id = ?    
-    """;
 
     private final UserRowMapper USER_ROW_MAPPER = new UserRowMapper();
     private final JdbcTemplate jdbcTemplate;
@@ -40,11 +36,6 @@ public class UserDao {
     public List<User> getAllUsers(Double latitude, Double longitude, Long userId) {
 
         return jdbcTemplate.query(NEARBY_MENTORS, USER_ROW_MAPPER, new Object[] {latitude, longitude, latitude, userId});
-    }
-
-    public List<User> getAllMentorsByAcademyId(Long userId, Long academyId) {
-
-        return jdbcTemplate.query(GET_ALL_MENTORS_BY_ACADEMY_ID, USER_ROW_MAPPER, new Object[]{userId, academyId});
     }
 
     class UserRowMapper implements RowMapper<User> {

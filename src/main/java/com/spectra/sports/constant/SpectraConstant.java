@@ -18,6 +18,7 @@ public final class SpectraConstant {
     public static final String ERROR = "error";
     public static final String MESSAGE = "message";
     public static final String USER = "user";
+    public static final String USER_MAPPING = "userMapping";
     public static final String FLAG = "flag";
     public static final String ACADEMY = "academy";
     public static final String MENTOR = "mentor";
@@ -25,5 +26,6 @@ public final class SpectraConstant {
     public static final String OTP = "otp";
     public static final String MONTHS = "months";
     public static final String PLAN = "plan";
+    public static final String SLOT = "slot";
     public static final String AMOUNT = "amount";
 }

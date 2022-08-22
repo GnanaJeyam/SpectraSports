@@ -31,6 +31,9 @@ public class UserMapping extends BaseEntity {
     @Column(name = "plan_info")
     private String plan;
 
+    @Column(name = "slot")
+    private String slot;
+
     @Column(name = "amount")
     private Double amount;
 

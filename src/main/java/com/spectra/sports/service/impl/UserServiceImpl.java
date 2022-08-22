@@ -120,34 +120,55 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SuccessResponse<UserDto> getMentorDetailById(Long mentorId) {
-        var currentUserId = UserContextHolder.getCurrentUser().userId();
-        var mentorWithMappedFlag = userRepository.getMentorByIdWithCurrentUserMappedFlag(currentUserId, mentorId);
+        var currentUser = UserContextHolder.getCurrentUser();
+        var userId = currentUser.userId();
+        var mentor = userRepository.findById(mentorId).orElseThrow();
+        var roles = currentUser.roles().stream().findFirst().orElseThrow();
 
-        var mentor = (User) mentorWithMappedFlag.get(USER);
-        var flag = (Boolean) mentorWithMappedFlag.get(FLAG);
+        if (roles.getRoleType().equals(ACADEMY)) {
+            var userMappings = userMappingRepository.getAllUserMappingByMentorAndAcademyId(mentorId, userId);
+            updateMappingDetails(mentor, userMappings);
+        } else if (roles.getRoleType().equals(RoleType.USER)) {
+            var userMappings = userMappingRepository.getAllUserMappingByMentorAndStudentId(mentorId, userId);
+            updateMappingDetails(mentor, userMappings);
+        }
 
-        return defaultResponse(UserDto.from(mentor, flag), "Get Mentor Detail by mentor id with mapped flag");
+        return defaultResponse(UserDto.from(mentor), "Get Mentor Detail by mentor id with mapped flag");
+    }
+
+    private void updateMappingDetails(User mentor, List<UserMapping> userMappings) {
+        if (!userMappings.isEmpty()) {
+            mentor.setMapped(true);
+            var userMapping = userMappings.stream().findFirst().orElseThrow();
+            mentor.setSubscriptionInfo(SubscriptionInfo.from(userMapping));
+        }
     }
 
     @Override
     public Map<String, ?> getAcademyDetailById(Long academyId) {
         var currentUserId = UserContextHolder.getCurrentUser().userId();
-        var academyIdWithCurrentUserMappedFlag = userRepository.getAcademyIdWithCurrentUserMappedFlag(currentUserId, academyId);
 
+        var academyIdWithCurrentUserMappedFlag = userRepository.getAcademyIdWithCurrentUserMappedFlag(currentUserId, academyId);
         var academy = (User) academyIdWithCurrentUserMappedFlag.get(USER);
         var flag = (Boolean) academyIdWithCurrentUserMappedFlag.get(FLAG);
         var academyDto = UserDto.from(academy, flag);
-        var mentors = userDao.getAllMentorsByAcademyId(currentUserId, academyId).stream();
-        var bucket = new LinkedHashMap<Long, UserDto>();
-        mentors.forEach(user -> {
-            UserDto userDto = bucket.get(user.getUserId());
-            if ((nonNull(userDto) && user.isMapped()) || isNull(userDto)) {
-                bucket.put(user.getUserId(), UserDto.from(user));
-            }
+
+        var mentorsMappings = userMappingRepository.getAllUserMappingByAcademyId(academyId);
+        var bucket = new LinkedHashMap<Long, UserMapping>();
+        mentorsMappings.forEach(userMapping -> {
+            bucket.put(userMapping.getMentorId(), userMapping);
         });
+        var mentors = userRepository.findAllById(bucket.keySet())
+            .stream()
+            .map(user -> {
+                var userMapping = bucket.get(user.getUserId());
+                user.setSubscriptionInfo(SubscriptionInfo.from(userMapping));
+
+                return UserDto.from(user, currentUserId.equals(userMapping.getStudentId()));
+            });
 
         return Map.of(
-            BODY, Map.of(SpectraConstant.ACADEMY, academyDto, SpectraConstant.MENTOR, bucket.values()),
+            BODY, Map.of(SpectraConstant.ACADEMY, academyDto, SpectraConstant.MENTOR, mentors),
             STATUS, HttpStatus.OK.value(),
             ERROR, false,
             MESSAGE,"Get Academy Detail by academy id with mapped flag"
@@ -162,11 +183,11 @@ public class UserServiceImpl implements UserService {
 
         var nearByUsers = userDao.getAllUsers(latitude, longitude, user.userId());
         var nearByList = nearByUsers.stream().map(UserDto::from).collect(Collectors.toList());
-        if( CollectionUtils.isEmpty(nearByUsers) ) {
+        if ( CollectionUtils.isEmpty(nearByUsers) ) {
             nearByList = getAllUsersByRole(MENTOR.name(), 1, 5)
-                    .stream()
-                    .filter(userDto -> userDto.userId() != user.userId())
-                    .collect(Collectors.toList());
+                .stream()
+                .filter(userDto -> userDto.userId() != user.userId())
+                .collect(Collectors.toList());
         }
 
         return defaultResponse(nearByList, "Get All Nearby Mentors");
@@ -178,9 +199,7 @@ public class UserServiceImpl implements UserService {
         var mentorMappings = userMappingRepository.getAllStudentsByMentorId(mentorId);
         var mentorInfo = new HashMap<Long, SubscriptionInfo>();
         mentorMappings.forEach( userMapping -> {
-            var expired = Objects.isNull(userMapping.getExpired()) ? TRUE : userMapping.getExpired();
-            var subscriptionInfo = new SubscriptionInfo(userMapping.getStartDate(), userMapping.getEndDate(),
-                    expired, userMapping.getPlan(), userMapping.getAmount());
+            var subscriptionInfo = SubscriptionInfo.from(userMapping);
             mentorInfo.put(userMapping.getStudentId(), subscriptionInfo);
         });
 
@@ -321,7 +340,6 @@ public class UserServiceImpl implements UserService {
      * @param userDetails
      * @return
      */
-
     @Override
     public SuccessResponse<String> updateUserMapping(Map<String, String> userDetails) {
         var studentId = toLong(userDetails.get(STUDENT_ID));
@@ -348,11 +366,13 @@ public class UserServiceImpl implements UserService {
         var todayDate = LocalDate.now();
         var expiryDate = todayDate.plusMonths(totalMonths);
         var plan = userDetails.get(PLAN);
+        var slot = userDetails.get(SLOT);
         var amount = Double.valueOf(userDetails.get(AMOUNT));
 
         userMapping.setStartDate(todayDate);
         userMapping.setEndDate(expiryDate);
         userMapping.setPlan(plan);
+        userMapping.setSlot(slot);
         userMapping.setAmount(amount);
     }
 
@@ -394,11 +414,11 @@ public class UserServiceImpl implements UserService {
         var currentUserId = UserContextHolder.getCurrentUser().userId();
         var page = PageRequest.of(0, 30);
 
-        var academies = userRepository.getAllAcademyByStudentId(currentUserId, page);
+        var academies = getAllAcademiesByStudentId(currentUserId);
         var mentors = getAllMentorsByStudentId(currentUserId);
 
         var result = Map.of(
-            SpectraConstant.ACADEMY, academies.stream().map(user -> UserDto.from(user, true)),
+            SpectraConstant.ACADEMY, academies,
             SpectraConstant.MENTOR, mentors
         );
 
@@ -422,10 +442,26 @@ public class UserServiceImpl implements UserService {
         var mentorMappings = userMappingRepository.getAllUserMappingsByStudentId(studentId);
         var mentorInfo = new HashMap<Long, SubscriptionInfo>();
         mentorMappings.forEach( userMapping -> {
-            var expired = Objects.isNull(userMapping.getExpired()) ? TRUE : userMapping.getExpired();
-            var subscriptionInfo = new SubscriptionInfo(userMapping.getStartDate(), userMapping.getEndDate(),
-                    expired, userMapping.getPlan(), userMapping.getAmount());
+            var subscriptionInfo = SubscriptionInfo.from(userMapping);
             mentorInfo.put(userMapping.getMentorId(), subscriptionInfo);
+        });
+
+        var mentors = userRepository.findAllById(mentorInfo.keySet());
+        var updatedMentor = mentors.stream().map(user -> {
+            user.setSubscriptionInfo(mentorInfo.get(user.getUserId()));
+
+            return UserDto.from(user, true);
+        });
+
+        return updatedMentor;
+    }
+
+    private Stream<UserDto> getAllAcademiesByStudentId(Long studentId) {
+        var academyMappings = userMappingRepository.getAllUserMappingsWithAcademyByStudentId(studentId);
+        var mentorInfo = new HashMap<Long, SubscriptionInfo>();
+        academyMappings.forEach( userMapping -> {
+            var subscriptionInfo = SubscriptionInfo.from(userMapping);
+            mentorInfo.put(userMapping.getAcademyId(), subscriptionInfo);
         });
 
         var mentors = userRepository.findAllById(mentorInfo.keySet());
