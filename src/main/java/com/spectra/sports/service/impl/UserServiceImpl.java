@@ -163,8 +163,10 @@ public class UserServiceImpl implements UserService {
             .stream()
             .map(user -> {
                 var userMapping = bucket.get(user.getUserId());
-                var isMapped = MENTOR.equals(currentRole.getRoleType()) ? currentUserId.equals(userMapping.getMentorId())
-                        : currentUserId.equals(userMapping.getStudentId());
+                var isMapped = false;
+                if (currentUserId.equals(userMapping.getMentorId()) || currentUserId.equals(userMapping.getStudentId())) {
+                    isMapped = true;
+                }
                 user.setSubscriptionInfo(SubscriptionInfo.from(userMapping));
 
                 return UserDto.from(user, isMapped);
