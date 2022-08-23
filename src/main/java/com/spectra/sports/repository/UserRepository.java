@@ -26,7 +26,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
          LEFT JOIN UserMapping userMapping 
          ON user.userId = userMapping.mentorId
          JOIN user.roles userRoles
-         WHERE userRoles.roleType = :role
+         WHERE userRoles.roleType = :role AND user.userId <> :userId 
          GROUP BY user.userId, userMapping.studentId, userMapping.mentorId, userMapping.academyId
          ORDER BY user.userId DESC  
     """)
@@ -40,7 +40,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         from User user LEFT JOIN UserMapping userMapping 
         ON user.userId = userMapping.mentorId
         JOIN user.roles userRoles
-         WHERE userRoles.roleType = :role
+         WHERE userRoles.roleType = :role AND user.userId <> :userId 
          GROUP BY user.userId, userMapping.studentId, userMapping.mentorId, userMapping.academyId
          ORDER BY user.userId DESC  
     """)
@@ -67,8 +67,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("""
         SELECT new Map( user as user, CASE WHEN EXISTS ( SELECT userMapping.studentId from UserMapping userMapping   
-        WHERE userMapping.academyId = :academyId AND userMapping.studentId = :userId ) THEN true ELSE false END as flag )
-        from User user where user.userId = :academyId
+        WHERE userMapping.academyId = :academyId AND ( userMapping.studentId = :userId or userMapping.mentorId = :userId ) ) 
+        THEN true ELSE false END as flag ) from User user where user.userId = :academyId
     """)
     Map<String, Object> getAcademyIdWithCurrentUserMappedFlag(Long userId, Long academyId);
 

@@ -146,7 +146,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Map<String, ?> getAcademyDetailById(Long academyId) {
-        var currentUserId = UserContextHolder.getCurrentUser().userId();
+        var currentUser = UserContextHolder.getCurrentUser();
+        var currentUserId = currentUser.userId();
+        var currentRole = currentUser.roles().stream().findFirst().orElseThrow();
 
         var academyIdWithCurrentUserMappedFlag = userRepository.getAcademyIdWithCurrentUserMappedFlag(currentUserId, academyId);
         var academy = (User) academyIdWithCurrentUserMappedFlag.get(USER);
@@ -155,16 +157,17 @@ public class UserServiceImpl implements UserService {
 
         var mentorsMappings = userMappingRepository.getAllUserMappingByAcademyId(academyId);
         var bucket = new LinkedHashMap<Long, UserMapping>();
-        mentorsMappings.forEach(userMapping -> {
-            bucket.put(userMapping.getMentorId(), userMapping);
-        });
+        mentorsMappings.forEach(userMapping -> bucket.put(userMapping.getMentorId(), userMapping));
+
         var mentors = userRepository.findAllById(bucket.keySet())
             .stream()
             .map(user -> {
                 var userMapping = bucket.get(user.getUserId());
+                var isMapped = MENTOR.equals(currentRole.getRoleType()) ? currentUserId.equals(userMapping.getMentorId())
+                        : currentUserId.equals(userMapping.getStudentId());
                 user.setSubscriptionInfo(SubscriptionInfo.from(userMapping));
 
-                return UserDto.from(user, currentUserId.equals(userMapping.getStudentId()));
+                return UserDto.from(user, isMapped);
             });
 
         return Map.of(
