@@ -7,14 +7,14 @@ import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "user_mapping")
+@Table(name = "student_mentor_academy_mapping")
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class UserMapping extends BaseEntity {
+public class StudentMentorAcademyMapping extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_mapping_id")
-    private Long userMappingId;
+    @Column(name = "user_mentor_academy_mapping_id")
+    private Long userMentorAcademyMappingId;
 
     @Column(name = "student_id")
     private Long studentId;
@@ -34,6 +34,12 @@ public class UserMapping extends BaseEntity {
     @Column(name = "slot")
     private String slot;
 
+    @Column(name = "mentor_type")
+    private String mentorType;
+
+    @Column(name = "academy_type")
+    private String academyType;
+
     @Column(name = "amount")
     private Double amount;
 
@@ -45,4 +51,7 @@ public class UserMapping extends BaseEntity {
 
     @Column(name = "expired")
     private Boolean expired;
+
+    @Column(name = "tagged")
+    private Boolean tagged;
 }

@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public class UserDao {
     private final static String NEARBY_MENTORS =  """
-        SELECT *, false as flag FROM ( 
+        SELECT * FROM ( 
             SELECT u.* , (
               6371 * acos (
               cos ( radians( ? ) )
@@ -56,7 +56,6 @@ public class UserDao {
             user.setImageName(rs.getString("image_name"));
             String specialistIn = rs.getString("specialistin");
             user.setSpecialistIn(specialistIn.replaceAll("\\{|}", "").split(","));
-            user.setMapped(rs.getBoolean("flag"));
 
             return user;
         }

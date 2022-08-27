@@ -12,13 +12,16 @@ public final class SpectraConstant {
     public static final String PASSWORD = "password";
     public static final String STUDENT_ID = "studentId";
     public static final String MENTOR_ID = "mentorId";
+    public static final String MENTOR_TYPE = "mentorType";
+    public static final String ACADEMY_TYPE = "academyType";
     public static final String ACADEMY_ID = "academyId";
     public static final String BODY = "body";
     public static final String STATUS = "status";
     public static final String ERROR = "error";
     public static final String MESSAGE = "message";
     public static final String USER = "user";
-    public static final String USER_MAPPING = "userMapping";
+    public static final String STUDENT_MENTOR = "studentMentor";
+    public static final String STUDENT_MENTOR_ACADEMY = "studentMentorAcademy";
     public static final String FLAG = "flag";
     public static final String ACADEMY = "academy";
     public static final String MENTOR = "mentor";

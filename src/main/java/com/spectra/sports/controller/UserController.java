@@ -56,22 +56,27 @@ public class UserController {
     }
 
     @GetMapping({"/mentors"})
-    SuccessResponse<List<UserDto>> getAllMentors() {
-        var mentorsByRole = userService.getMentorsByUser();
+    SuccessResponse<List<UserDto>> getAllMentors(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                 @RequestParam(value = "limit",defaultValue = "20") Integer limit) {
+        var mentorsByRole = userService.getMentorsByUser(page, limit);
 
         return mentorsByRole;
     }
 
     @GetMapping({"/academy/mentors"})
-    SuccessResponse<List<UserDto>> getAllMentorsByAcademy() {
-        var mentorsByAcademy = userService.getAllMentorsByAcademy();
+    SuccessResponse<List<UserDto>> getAllMentorsByAcademy(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                          @RequestParam(value = "limit",defaultValue = "30") Integer limit) {
+        var mentorsByAcademy = userService.getAllMentorsByAcademy(page, limit);
 
         return mentorsByAcademy;
     }
 
+    // Mentor has no academy list view
+    // Mentor has to return only mapped academy
+    // only for student
     @GetMapping({"/all/academy"})
     SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                              @RequestParam(value = "limit",defaultValue = "10") Integer limit) {
+                                                              @RequestParam(value = "limit",defaultValue = "20") Integer limit) {
         var mentorsByAcademy = userService.getAllAcademyWithMappedKey(page, limit);
 
         return mentorsByAcademy;
@@ -85,7 +90,7 @@ public class UserController {
     }
 
     @GetMapping({"/mentor/students"})
-    SuccessResponse<List<UserDto>> getAllStudentByMentorId() {
+    SuccessResponse<Map<String, ?>> getAllStudentByMentorId() {
         var mentorsAndAcademyByStudent = userService.getAllStudentByMentorId();
 
         return mentorsAndAcademyByStudent;
@@ -113,7 +118,7 @@ public class UserController {
     }
 
     @GetMapping({"/detail/academy/{academyId}"})
-    Map<String, ?> getAcademyDetailById(@PathVariable("academyId") Long academyId) {
+    SuccessResponse<Map<String, ?>> getAcademyDetailById(@PathVariable("academyId") Long academyId) {
         var mentorsOrAcademyByStudent = userService.getAcademyDetailById(academyId);
 
         return mentorsOrAcademyByStudent;

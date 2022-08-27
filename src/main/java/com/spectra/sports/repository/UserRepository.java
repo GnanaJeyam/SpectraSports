@@ -8,69 +8,20 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-import java.util.Map;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT user from User user WHERE user.email = :username")
     User getUserByUserName(String username);
 
-    @Query("SELECT user from User user JOIN user.roles userRoles WHERE userRoles.roleType = :role ")
+    @Query("SELECT user from User user JOIN user.roles userRoles WHERE userRoles.roleType = :role AND user.isVerified = true")
     List<User> getAllUsersByRole(RoleType role, Pageable pageable);
 
     @Query("""
-        SELECT new Map(user as user, userMapping.academyId as academyId, userMapping.studentId as studentId,
-          ( CASE 
-            WHEN userMapping.studentId = :userId THEN true else false 
-          END ) as flag )  
-         from User user 
-         LEFT JOIN UserMapping userMapping 
-         ON user.userId = userMapping.mentorId
-         JOIN user.roles userRoles
-         WHERE userRoles.roleType = :role AND user.userId <> :userId 
-         GROUP BY user.userId, userMapping.studentId, userMapping.mentorId, userMapping.academyId
-         ORDER BY user.userId DESC  
-    """)
-    List<Map<String, Object>> getAllMentorsByStudent(Long userId, RoleType role, Pageable pageable);
-
-    @Query("""
-        SELECT new Map(user as user, userMapping.academyId as academyId,   
-            userMapping.studentId as studentId,
-            ( CASE WHEN userMapping.academyId = :userId
-            THEN true else false END ) as flag )  
-        from User user LEFT JOIN UserMapping userMapping 
-        ON user.userId = userMapping.mentorId
-        JOIN user.roles userRoles
-         WHERE userRoles.roleType = :role AND user.userId <> :userId 
-         GROUP BY user.userId, userMapping.studentId, userMapping.mentorId, userMapping.academyId
-         ORDER BY user.userId DESC  
-    """)
-    List<Map<String, Object>> getAllMentorsByAcademy(Long userId, RoleType role, Pageable pageable);
-
-    @Query("""
-        SELECT new Map( user as user,   
-            ( CASE WHEN userMapping.studentId = :userId
-            THEN true else false END ) as flag )  
-        from User user LEFT JOIN UserMapping userMapping 
-        ON user.userId = userMapping.academyId
-        JOIN user.roles userRoles
-         WHERE userRoles.roleType = :role
-         ORDER BY user.userId DESC  
-    """)
-    List<Map<String, Object>> getAllAcademyWithMappedKey(Long userId, RoleType role, Pageable pageable);
-
-    @Query("""
-        SELECT user from User user where user.userId IN 
-        ( SELECT userMapping.mentorId from UserMapping userMapping WHERE
-            userMapping.academyId = :academyId ) 
+        SELECT user from User user where user.userId IN  
+        (SELECT DISTINCT mentorAcademy.mentorId FROM MentorAcademyMapping mentorAcademy 
+        WHERE mentorAcademy.academyId = :academyId AND mentorAcademy.tagged = true) 
     """)
     List<User> getAllMentorsByAcademy(Long academyId, Pageable pageable);
-
-    @Query("""
-        SELECT new Map( user as user, CASE WHEN EXISTS ( SELECT userMapping.studentId from UserMapping userMapping   
-        WHERE userMapping.academyId = :academyId AND ( userMapping.studentId = :userId or userMapping.mentorId = :userId ) ) 
-        THEN true ELSE false END as flag ) from User user where user.userId = :academyId
-    """)
-    Map<String, Object> getAcademyIdWithCurrentUserMappedFlag(Long userId, Long academyId);
 
     @Query(value = " SELECT usr.* from users usr where ( :searchKey Ilike  any (usr.specialistin) ) limit 20 ", nativeQuery = true)
     List<User> getAllUsersBySpecialistIn(String searchKey);

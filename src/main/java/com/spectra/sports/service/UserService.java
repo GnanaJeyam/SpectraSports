@@ -19,11 +19,11 @@ public interface UserService {
 
     SuccessResponse<UserDto> getMentorDetailById(Long mentorId);
 
-    Map<String, ?> getAcademyDetailById(Long academyId);
+    SuccessResponse<Map<String, ?>> getAcademyDetailById(Long academyId);
 
     SuccessResponse<List<UserDto>> getNearByMentors();
 
-    SuccessResponse<List<UserDto>> getAllStudentByMentorId();
+    SuccessResponse<Map<String, ?>> getAllStudentByMentorId();
 
     SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(Integer page, Integer limit);
 
@@ -43,11 +43,11 @@ public interface UserService {
 
     SuccessResponse<String> updateUserMapping(Map<String, String> userDetails);
 
-    SuccessResponse<List<UserDto>> getMentorsByUser();
+    SuccessResponse<List<UserDto>> getMentorsByUser(Integer page, Integer limit);
 
     SuccessResponse<List<StudentRatingDetail>> getAllStudentAttendanceByMentorId(Long mentorId);
 
-    SuccessResponse<List<UserDto>> getAllMentorsByAcademy();
+    SuccessResponse<List<UserDto>> getAllMentorsByAcademy(Integer page, Integer limit);
 
     SuccessResponse<List<UserDto>> getAllMentorsAndAcademyByStudent();
 
