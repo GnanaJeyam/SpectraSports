@@ -13,6 +13,9 @@
 .gradle
 .idea
 
+.DS_Store
+.dockerignore
+
 # User-specific stuff:
 .idea/**/workspace.xml
 .idea/**/tasks.xml

@@ -6,15 +6,18 @@ import com.spectra.sports.entity.User;
 import com.spectra.sports.repository.StudentMentorAcademyRepository;
 import com.spectra.sports.subscription.SubscriptionInfo;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.spectra.sports.constant.SpectraConstant.STUDENT_MENTOR_ACADEMY;
 import static com.spectra.sports.constant.SpectraConstant.USER;
 import static java.util.Arrays.asList;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Component
 public class StudentMentorAcademyMappingImpl implements Mapping {
@@ -85,7 +88,7 @@ public class StudentMentorAcademyMappingImpl implements Mapping {
 
         var mappingExists = studentMentorAcademyRepository.getStudentOrMentorWithAcademyMappingExists(userId, academyId);
 
-        return mappingExists.isPresent() && !CollectionUtils.isEmpty(mappingExists.get());
+        return mappingExists.isPresent() && !isEmpty(mappingExists.get());
     }
 
     private Stream<UserDto> mergeSubscriptionDetails(List<Map<String, Object>> users) {
