@@ -2,14 +2,6 @@ package com.spectra.sports.config;
 
 import com.spectra.sports.helper.JwtHelper;
 import com.spectra.sports.helper.UserContextHolder;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -19,6 +11,16 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.nonNull;
 
 @Configuration
 public class AuthTokenFilter extends OncePerRequestFilter {
@@ -55,10 +57,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     protected boolean shouldNotFilter(HttpServletRequest request) {
         var pathInfo = request.getRequestURI();
-        if (Objects.nonNull(pathInfo)) {
+        if (nonNull(pathInfo)) {
             var requestMethod = request.getMethod();
             var urls = whiteListedUrls.get(requestMethod);
-            if (Objects.nonNull(urls) && urls.stream().anyMatch((path) -> pathInfo.contains(path))) {
+            if (nonNull(urls) && urls.stream().anyMatch((path) -> pathInfo.contains(path))) {
                 return true;
             }
         }

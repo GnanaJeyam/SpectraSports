@@ -140,7 +140,7 @@ public class UserController {
         return newUser;
     }
 
-    @PostMapping({"/sign-in"})
+    @PostMapping("/sign-in")
     Map<String, ?> signInUser(@RequestBody Map<String, String> userCredentials) throws JsonProcessingException {
         var successResponse = userService.signInUser(userCredentials);
 

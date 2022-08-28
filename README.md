@@ -6,3 +6,6 @@ A Sports Academy Management Application
 ### Spring boot 2.7.0
 ### Gradle 7.4.2
 ### Postgres 14.2
+
+# How to build the project
+`gradle clean build`
