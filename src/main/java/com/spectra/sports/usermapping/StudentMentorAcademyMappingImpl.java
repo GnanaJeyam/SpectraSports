@@ -14,10 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.spectra.sports.constant.SpectraConstant.STUDENT_MENTOR_ACADEMY;
-import static com.spectra.sports.constant.SpectraConstant.USER;
-import static java.util.Arrays.asList;
-import static org.springframework.util.CollectionUtils.isEmpty;
+import static com.spectra.sports.constant.SpectraConstant.*;
 
 @Component
 public class StudentMentorAcademyMappingImpl implements Mapping {
@@ -70,13 +67,6 @@ public class StudentMentorAcademyMappingImpl implements Mapping {
         return mergeSubscriptionDetails(allAcademyDetailsByStudent);
     }
 
-    public Stream<UserDto> getAllMentorDetailsByAcademyId(Long academyId, Long userId) {
-
-        var mentorDetailsByAcademyId = studentMentorAcademyRepository.getAllMentorDetailsByAcademyId(academyId);
-
-        return mergeSubscriptionDetailsWithUserId(mentorDetailsByAcademyId, userId);
-    }
-
     public Stream<UserDto> getAllAcademyStudentDetailsByMentorId(Long mentorId) {
 
         var studentsByMentorId = studentMentorAcademyRepository.getAllAcademyStudentDetailsByMentorId(mentorId);
@@ -84,11 +74,13 @@ public class StudentMentorAcademyMappingImpl implements Mapping {
         return mergeSubscriptionDetails(studentsByMentorId);
     }
 
-    public boolean getStudentOrMentorWithAcademyMapping(Long userId, Long academyId) {
+    public UserDto getStudentOrMentorWithAcademyMapping(Long studentId, Long academyId) {
 
-        var mappingExists = studentMentorAcademyRepository.getStudentOrMentorWithAcademyMappingExists(userId, academyId);
+        var academy = studentMentorAcademyRepository.getAcademyDetailWithMapping(studentId, academyId);
+        var user = (User) academy.get(USER);
+        var isMapped = (Boolean) academy.get(FLAG);
 
-        return mappingExists.isPresent() && !isEmpty(mappingExists.get());
+        return UserDto.from(user, isMapped);
     }
 
     private Stream<UserDto> mergeSubscriptionDetails(List<Map<String, Object>> users) {
@@ -100,18 +92,6 @@ public class StudentMentorAcademyMappingImpl implements Mapping {
                     user.setSubscriptionInfo(SubscriptionInfo.from(studentMentorAcademy));
 
                     return UserDto.from(user, true);
-                });
-    }
-
-    private Stream<UserDto> mergeSubscriptionDetailsWithUserId(List<Map<String, Object>> users, Long userId) {
-        return users.stream()
-                .map(userMap -> {
-                    var user = (User) userMap.get(USER);
-                    var stdMtrAcademy = (StudentMentorAcademyMapping) userMap.get(STUDENT_MENTOR_ACADEMY);
-                    var isMapped = asList(stdMtrAcademy.getMentorId(), stdMtrAcademy.getStudentId()).contains(userId);
-                    user.setSubscriptionInfo(SubscriptionInfo.from(stdMtrAcademy));
-
-                    return UserDto.from(user, isMapped);
                 });
     }
 }

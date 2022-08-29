@@ -1,6 +1,7 @@
 package com.spectra.sports.repository;
 
 import com.spectra.sports.entity.MentorAcademyMapping;
+import com.spectra.sports.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -13,4 +14,10 @@ public interface MentorAcademyRepository extends JpaRepository<MentorAcademyMapp
         WHERE mentorAcademy.academyId = :academyId AND mentorAcademy.tagged = true
     """)
     List<Long> getAllMentorIdsByAcademy(Long academyId);
+
+    @Query("""
+        SELECT user FROM User user INNER JOIN MentorAcademyMapping mentorAcademy ON user.userId = mentorAcademy.mentorId  
+        WHERE mentorAcademy.academyId = :academyId AND mentorAcademy.tagged = true 
+    """)
+    List<User> getAllMentorDetailsByAcademyId(Long academyId);
 }

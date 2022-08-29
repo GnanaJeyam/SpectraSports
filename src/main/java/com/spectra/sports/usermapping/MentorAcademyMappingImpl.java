@@ -1,20 +1,26 @@
 package com.spectra.sports.usermapping;
 
+import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.MentorAcademyMapping;
 import com.spectra.sports.repository.MentorAcademyRepository;
+import com.spectra.sports.repository.StudentMentorAcademyRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @Slf4j
 public class MentorAcademyMappingImpl implements Mapping {
     private final MentorAcademyRepository mentorAcademyRepository;
+    private final StudentMentorAcademyRepository studentMentorAcademyRepository;
 
-    public MentorAcademyMappingImpl(MentorAcademyRepository mentorAcademyRepository) {
+    public MentorAcademyMappingImpl(MentorAcademyRepository mentorAcademyRepository,
+                                    StudentMentorAcademyRepository studentMentorAcademyRepository) {
         this.mentorAcademyRepository = mentorAcademyRepository;
+        this.studentMentorAcademyRepository = studentMentorAcademyRepository;
     }
 
     @Override
@@ -35,5 +41,12 @@ public class MentorAcademyMappingImpl implements Mapping {
                 .getAllMentorIdsByAcademy(academyId)
                 .stream()
                 .collect(Collectors.toSet());
+    }
+
+    public Stream<UserDto> getAllMentorDetailsByAcademyId(Long academyId, Long studentId) {
+        var mentors = mentorAcademyRepository.getAllMentorDetailsByAcademyId(academyId);
+        var mentorIdsByStudent = studentMentorAcademyRepository.getAllMentorByStudentAndAcademyId(studentId, academyId);
+
+        return mentors.stream().map(user -> UserDto.from(user, mentorIdsByStudent.contains(user.getUserId())));
     }
 }

@@ -19,11 +19,20 @@ public interface StudentMentorAcademyRepository extends JpaRepository<StudentMen
     Set<Long> getAllAcademyByStudentId(Long studentId);
 
     @Query("""
-        SELECT stdMentorAcademy.academyId from StudentMentorAcademyMapping stdMentorAcademy WHERE  
-         stdMentorAcademy.academyId = :academyId AND ( stdMentorAcademy.studentId = :userId OR stdMentorAcademy.mentorId = :userId ) 
-         AND stdMentorAcademy.expired = false AND stdMentorAcademy.tagged = true     
+        SELECT DISTINCT stdMentorAcademy.mentorId from StudentMentorAcademyMapping stdMentorAcademy 
+         WHERE stdMentorAcademy.studentId = :studentId AND stdMentorAcademy.academyId = :academyId 
+         AND stdMentorAcademy.expired = false AND stdMentorAcademy.tagged = true      
     """)
-    Optional<List<Long>> getStudentOrMentorWithAcademyMappingExists(Long userId, Long academyId);
+    Set<Long> getAllMentorByStudentAndAcademyId(Long studentId, Long academyId);
+
+    @Query("""
+        SELECT new Map( user as user, CASE WHEN EXISTS (
+            SELECT stdMentorAcademy.academyId from StudentMentorAcademyMapping stdMentorAcademy WHERE  
+             stdMentorAcademy.academyId = :academyId AND stdMentorAcademy.studentId = :userId  
+             AND stdMentorAcademy.expired = false AND stdMentorAcademy.tagged = true 
+         ) THEN true ELSE false END as flag ) from User user where user.userId = :academyId     
+    """)
+    Map<String, Object> getAcademyDetailWithMapping(Long userId, Long academyId);
 
     @Query("""
         SELECT stdMentorAcademy from StudentMentorAcademyMapping stdMentorAcademy WHERE stdMentorAcademy.academyId = :academyId 

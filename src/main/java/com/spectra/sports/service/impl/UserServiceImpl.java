@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spectra.sports.constant.SpectraConstant;
 import com.spectra.sports.dao.UserDao;
 import com.spectra.sports.dto.UserDto;
-import com.spectra.sports.entity.*;
+import com.spectra.sports.entity.Role;
+import com.spectra.sports.entity.RoleType;
+import com.spectra.sports.entity.StudentRatingDetail;
+import com.spectra.sports.entity.User;
 import com.spectra.sports.factory.MappingFactory;
 import com.spectra.sports.helper.JwtHelper;
 import com.spectra.sports.helper.UserContextHolder;
@@ -154,12 +157,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public SuccessResponse<Map<String, ?>> getAcademyDetailById(Long academyId) {
         var currentUser = UserContextHolder.getCurrentUser();
-        var userId = currentUser.userId();
+        var studentId = currentUser.userId();
 
-        var academy = userRepository.findById(academyId).orElseThrow();
-        var studentOrMentorWithAcademyMappingExists = studentMentorAcademy.getStudentOrMentorWithAcademyMapping(userId, academyId);
-        academy.setMapped(studentOrMentorWithAcademyMappingExists);
-        var mentors = studentMentorAcademy.getAllMentorDetailsByAcademyId(academyId, userId);
+        var academy = studentMentorAcademy.getStudentOrMentorWithAcademyMapping(studentId, academyId);
+        var mentors = mentorAcademy.getAllMentorDetailsByAcademyId(academyId, studentId);
 
         return defaultResponse( Map.of(SpectraConstant.ACADEMY, academy, SpectraConstant.MENTOR, mentors),
                 "Get Academy Detail by academy id with mapped flag" );
