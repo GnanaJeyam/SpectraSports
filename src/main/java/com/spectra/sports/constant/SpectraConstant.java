@@ -20,6 +20,8 @@ public final class SpectraConstant {
     public static final String ERROR = "error";
     public static final String MESSAGE = "message";
     public static final String USER = "user";
+    public static final String USER_ID = "userId";
+    public static final String ACCESS_TOKEN = "accessToken";
     public static final String STUDENT_MENTOR = "studentMentor";
     public static final String STUDENT_MENTOR_ACADEMY = "studentMentorAcademy";
     public static final String FLAG = "flag";
