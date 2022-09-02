@@ -15,7 +15,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.spectra.sports.constant.SpectraConstant.*;
+import static com.spectra.sports.constant.SpectraConstant.STUDENT_MENTOR;
+import static com.spectra.sports.constant.SpectraConstant.USER;
 
 @Component
 public class StudentMentorMappingImpl implements Mapping {
@@ -44,6 +45,7 @@ public class StudentMentorMappingImpl implements Mapping {
         studentMentorMapping.setMentorId(request.mentorId());
         studentMentorMapping.setStudentId(request.studentId());
         studentMentorMapping.setMentorType(request.mentorType());
+        studentMentorMapping.setSlotDays(request.slotDays());
 
         studentMentorRepository.save(studentMentorMapping);
         studentRating.updateStudentRatingDetails(request.mentorId(), request.studentId());

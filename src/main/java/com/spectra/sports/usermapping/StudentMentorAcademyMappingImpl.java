@@ -45,6 +45,8 @@ public class StudentMentorAcademyMappingImpl implements Mapping {
         studentMentorAcademy.setStudentId(request.studentId());
         studentMentorAcademy.setMentorType(request.mentorType());
         studentMentorAcademy.setAcademyType(request.academyType());
+        studentMentorAcademy.setSlotDays(request.slotDays());
+        studentMentorAcademy.setAcademyName(request.academyName());
 
         studentMentorAcademyRepository.save(studentMentorAcademy);
         studentRating.updateStudentRatingDetails(request.mentorId(), request.studentId());

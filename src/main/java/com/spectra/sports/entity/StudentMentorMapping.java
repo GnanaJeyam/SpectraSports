@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "student_mentor_mapping")
+@Table(name = "student_mentor_mapping", indexes = {@Index(name = "student_mentor_index", columnList = "student_id, mentor_id")})
 @Data
 @EqualsAndHashCode(callSuper=false)
 public class StudentMentorMapping extends BaseEntity{
@@ -30,6 +30,9 @@ public class StudentMentorMapping extends BaseEntity{
 
     @Column(name = "slot")
     private String slot;
+
+    @Column(name = "slot_days")
+    private String slotDays;
 
     @Column(name = "mentor_type")
     private String mentorType;

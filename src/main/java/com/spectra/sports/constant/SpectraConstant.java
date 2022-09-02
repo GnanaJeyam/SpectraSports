@@ -14,6 +14,7 @@ public final class SpectraConstant {
     public static final String MENTOR_ID = "mentorId";
     public static final String MENTOR_TYPE = "mentorType";
     public static final String ACADEMY_TYPE = "academyType";
+    public static final String ACADEMY_NAME = "academyName";
     public static final String ACADEMY_ID = "academyId";
     public static final String BODY = "body";
     public static final String STATUS = "status";
@@ -32,5 +33,6 @@ public final class SpectraConstant {
     public static final String MONTHS = "months";
     public static final String PLAN = "plan";
     public static final String SLOT = "slot";
+    public static final String SLOT_DAYS = "slotDays";
     public static final String AMOUNT = "amount";
 }

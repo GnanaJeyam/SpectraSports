@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "student_mentor_academy_mapping")
+@Table(name = "student_mentor_academy_mapping", indexes = {@Index(name = "student_mentor_academy_index", columnList = "student_id, mentor_id, academy_id")})
 @Data
 @EqualsAndHashCode(callSuper=false)
 public class StudentMentorAcademyMapping extends BaseEntity {
@@ -34,11 +34,17 @@ public class StudentMentorAcademyMapping extends BaseEntity {
     @Column(name = "slot")
     private String slot;
 
+    @Column(name = "slot_days")
+    private String slotDays;
+
     @Column(name = "mentor_type")
     private String mentorType;
 
     @Column(name = "academy_type")
     private String academyType;
+
+    @Column(name = "academy_name")
+    private String academyName;
 
     @Column(name = "amount")
     private Double amount;

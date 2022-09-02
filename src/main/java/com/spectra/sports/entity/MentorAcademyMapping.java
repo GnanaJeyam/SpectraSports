@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "mentor_academy_mapping")
+@Table(name = "mentor_academy_mapping", indexes = {@Index(name = "mentor_academy_index", columnList = "mentor_id, academy_id")})
 @Data
 @EqualsAndHashCode(callSuper=false)
 public class MentorAcademyMapping extends BaseEntity{

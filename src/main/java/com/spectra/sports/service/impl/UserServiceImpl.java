@@ -328,12 +328,14 @@ public class UserServiceImpl implements UserService {
         var plan = userDetails.get(PLAN);
         var mentorType = userDetails.get(MENTOR_TYPE);
         var academyType = userDetails.get(ACADEMY_TYPE);
+        var academyName = userDetails.get(ACADEMY_NAME);
         var slot = userDetails.get(SLOT);
+        var slotDays = userDetails.get(SLOT_DAYS);
         var amount = toDouble(userDetails.get(AMOUNT));
 
         return new UserMappingRequest(
-            studentId, mentorId, academyId, totalMonths,
-            amount, plan, mentorType, academyType, slot
+            studentId, mentorId, academyId, totalMonths, amount,
+            plan, mentorType, academyType, slot, slotDays, academyName
         );
     }
 
