@@ -46,6 +46,7 @@ import static com.spectra.sports.response.SuccessResponse.errorResponse;
 import static com.spectra.sports.util.NumberUtil.toDouble;
 import static com.spectra.sports.util.NumberUtil.toLong;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -117,6 +118,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SuccessResponse<?> updateStudentAttendance(StudentRatingDetail studentRatingDetail) {
+        Assert.notNull(studentRatingDetail.getStudentRatingDetailId(), STUDENT_RATING_DETAIL_ID_CANT_BE_NULL);
+
+        var existingStudentRating = studentRatingDetailRepository.findById(studentRatingDetail.getStudentRatingDetailId()).orElseThrow();
+        var existingAttendances = existingStudentRating.getAttendances();
+
+        var newAttendance = studentRatingDetail.getAttendances().stream().findFirst().orElseThrow();
+        var attendanceDiff = Map.of(newAttendance.getDay(), newAttendance.isFlag());
+
+        studentRatingDetail.setAttendances(existingAttendances.stream().map(attendance -> {
+            if (nonNull(attendanceDiff.get(attendance.getDay()))) {
+                return newAttendance;
+            }
+
+            return attendance;
+        }).collect(Collectors.toList()));
+
         var studentRating = studentRatingDetailRepository.saveAndFlush(studentRatingDetail);
 
         return defaultResponse(studentRating, STUDENT_ATTENDANCE_DETAILS_ARE_UPDATED);

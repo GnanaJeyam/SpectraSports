@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static java.time.DayOfWeek.*;
+import static com.spectra.sports.constant.SpectraConstant.*;
 
 @Component
 public class StudentRatingImpl {
@@ -36,13 +36,13 @@ public class StudentRatingImpl {
 
     private List<Attendance> getAttendanceList() {
         return List.of(
-                Attendance.builder().day(SUNDAY.name()).build(),
-                Attendance.builder().day(MONDAY.name()).build(),
-                Attendance.builder().day(TUESDAY.name()).build(),
-                Attendance.builder().day(WEDNESDAY.name()).build(),
-                Attendance.builder().day(THURSDAY.name()).build(),
-                Attendance.builder().day(FRIDAY.name()).build(),
-                Attendance.builder().day(SATURDAY.name()).build()
+                Attendance.builder().day(SUNDAY).build(),
+                Attendance.builder().day(MONDAY).build(),
+                Attendance.builder().day(TUESDAY).build(),
+                Attendance.builder().day(WEDNESDAY).build(),
+                Attendance.builder().day(THURSDAY).build(),
+                Attendance.builder().day(FRIDAY).build(),
+                Attendance.builder().day(SATURDAY).build()
         );
     }
 }

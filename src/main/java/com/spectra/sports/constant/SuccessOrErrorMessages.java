@@ -36,6 +36,8 @@ public final class SuccessOrErrorMessages {
 
     // Error Messages
     public static final String USER_CANNOT_BE_NULL = "User Cannot be null";
+    public static final String STUDENT_RATING_DETAIL_ID_CANT_BE_NULL = "Student Rating Detail Id cannot be null.";
+
     public static final String DUPLICATE_USER = "Duplicate User, Please try with a different email or Phone Number";
     public static final String USER_NOT_FOUND = "User Not Found";
     public static final String INVALID_USERNAME_OR_PASSWORD = "Invalid username or password";
