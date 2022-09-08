@@ -5,6 +5,7 @@ import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.StudentRatingDetail;
 import com.spectra.sports.entity.User;
 import com.spectra.sports.response.SuccessResponse;
+
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,8 @@ public interface UserService {
     SuccessResponse<List<UserDto>> getMentorsByUser(Integer page, Integer limit);
 
     SuccessResponse<List<StudentRatingDetail>> getAllStudentAttendanceByMentorId(Long mentorId);
+
+    SuccessResponse<StudentRatingDetail> getStudentAttendanceDetailById(Long studentAttendanceId);
 
     SuccessResponse<List<UserDto>> getAllMentorsByAcademy(Integer page, Integer limit);
 

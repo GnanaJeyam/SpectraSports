@@ -21,15 +21,18 @@ public class StudentRatingImpl {
         this.userRepository = userRepository;
     }
 
-    public void updateStudentRatingDetails(Long mentorId, Long studentId) {
-        var user = userRepository.findById(studentId).orElseThrow();
+    public void updateStudentRatingDetails(UserMappingRequest request) {
+        var user = userRepository.findById(request.studentId()).orElseThrow();
         var studentRatingDetail = new StudentRatingDetail();
         studentRatingDetail.setRating("0/10");
         studentRatingDetail.setFullName(user.getFirstName() + " " + user.getLastName());
-        studentRatingDetail.setMentorId(mentorId);
-        studentRatingDetail.setStudentId(studentId);
-        studentRatingDetail.setCreatedBy(mentorId);
+        studentRatingDetail.setMentorId(request.mentorId());
+        studentRatingDetail.setStudentId(request.studentId());
+        studentRatingDetail.setCreatedBy(request.mentorId());
         studentRatingDetail.setAttendances(getAttendanceList());
+        studentRatingDetail.setAcademyName(request.academyName());
+        studentRatingDetail.setSlot(request.slot());
+        studentRatingDetail.setSlotDays(request.slotDays());
 
         studentRatingDetailRepository.save(studentRatingDetail);
     }

@@ -37,4 +37,13 @@ public class StudentRatingDetail extends BaseEntity {
 
     @Column(name = "rating")
     private String rating;
+
+    @Column(name = "slot")
+    private String slot;
+
+    @Column(name = "slot_days")
+    private String slotDays;
+
+    @Column(name = "academy_name")
+    private String academyName;
 }

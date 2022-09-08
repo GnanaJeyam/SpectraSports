@@ -2,8 +2,10 @@ package com.spectra.sports.repository;
 
 import com.spectra.sports.entity.StudentRatingDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -11,7 +13,24 @@ import java.util.List;
 public interface StudentRatingDetailRepository extends JpaRepository<StudentRatingDetail, Long> {
 
     @Query("""
-            SELECT studentDetail from StudentRatingDetail studentDetail where studentDetail.mentorId = :mentorId
+            SELECT studentDetail from StudentRatingDetail studentDetail WHERE studentDetail.mentorId = :mentorId 
+            ORDER BY studentDetail.studentRatingDetailId DESC
     """)
     List<StudentRatingDetail> getAllStudentAttendanceDetailsByMentorId(Long mentorId);
+
+    @Modifying
+    @Transactional
+    @Query("""
+         DELETE from StudentRatingDetail studentDetail WHERE studentDetail.mentorId = :mentorId AND  
+         studentDetail.studentId = :studentId AND studentDetail.academyName is null        
+    """)
+    void updateMappedByMentorIdAndStudentIdWithoutAcademy(Long mentorId, Long studentId);
+
+    @Modifying
+    @Transactional
+    @Query("""
+         DELETE from StudentRatingDetail studentDetail WHERE studentDetail.mentorId = :mentorId AND  
+         studentDetail.studentId = :studentId AND studentDetail.academyName = :academyName        
+    """)
+    void updateMappedByMentorIdAndStudentIdWithAcademy(Long mentorId, Long studentId, String academyName);
 }

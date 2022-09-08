@@ -117,6 +117,13 @@ public class UserController {
         return allStudentAttendanceByMentorId;
     }
 
+    @GetMapping({"/student/attendance/detail/{id}"})
+    SuccessResponse<StudentRatingDetail> getAllStudentAttendanceById(@PathVariable("id") Long studentAttendanceId) {
+        var studentRatingDetail = userService.getStudentAttendanceDetailById(studentAttendanceId);
+
+        return studentRatingDetail;
+    }
+
     @GetMapping({"/detail/academy/{academyId}"})
     SuccessResponse<Map<String, ?>> getAcademyDetailById(@PathVariable("academyId") Long academyId) {
         var mentorsOrAcademyByStudent = userService.getAcademyDetailById(academyId);

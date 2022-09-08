@@ -49,7 +49,7 @@ public class StudentMentorAcademyMappingImpl implements Mapping {
         studentMentorAcademy.setAcademyName(request.academyName());
 
         studentMentorAcademyRepository.save(studentMentorAcademy);
-        studentRating.updateStudentRatingDetails(request.mentorId(), request.studentId());
+        studentRating.updateStudentRatingDetails(request);
     }
 
     public Set<Long> getAllAcademyByStudentId(Long studentId) {

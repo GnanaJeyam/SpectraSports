@@ -9,5 +9,5 @@ import java.io.Serializable;
 @Builder
 public class Attendance implements Serializable {
     private String day;
-    private boolean flag;
+    private short status;
 }

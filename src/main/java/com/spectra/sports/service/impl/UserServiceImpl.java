@@ -23,6 +23,7 @@ import com.spectra.sports.usermapping.MentorAcademyMappingImpl;
 import com.spectra.sports.usermapping.StudentMentorAcademyMappingImpl;
 import com.spectra.sports.usermapping.StudentMentorMappingImpl;
 import com.spectra.sports.usermapping.UserMappingRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -46,11 +47,11 @@ import static com.spectra.sports.response.SuccessResponse.errorResponse;
 import static com.spectra.sports.util.NumberUtil.toDouble;
 import static com.spectra.sports.util.NumberUtil.toLong;
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -124,15 +125,19 @@ public class UserServiceImpl implements UserService {
         var existingAttendances = existingStudentRating.getAttendances();
 
         var newAttendance = studentRatingDetail.getAttendances().stream().findFirst().orElseThrow();
-        var attendanceDiff = Map.of(newAttendance.getDay(), newAttendance.isFlag());
 
         studentRatingDetail.setAttendances(existingAttendances.stream().map(attendance -> {
-            if (nonNull(attendanceDiff.get(attendance.getDay()))) {
+            if (attendance.getDay().equals(newAttendance.getDay())) {
                 return newAttendance;
             }
 
             return attendance;
         }).collect(Collectors.toList()));
+
+        studentRatingDetail.setAcademyName(existingStudentRating.getAcademyName());
+        studentRatingDetail.setFullName(existingStudentRating.getFullName());
+        studentRatingDetail.setSlot(existingStudentRating.getSlot());
+        studentRatingDetail.setSlotDays(existingStudentRating.getSlotDays());
 
         var studentRating = studentRatingDetailRepository.saveAndFlush(studentRatingDetail);
 
@@ -265,7 +270,8 @@ public class UserServiceImpl implements UserService {
         UserDto userDto;
         try {
             userDto = jwtHelper.parseToken(token);
-        } catch (Exception var4) {
+        } catch (Exception exception) {
+            log.error(INVALID_USER, exception);
             return INVALID_USER;
         }
 
@@ -379,6 +385,13 @@ public class UserServiceImpl implements UserService {
         var studentAttendanceDetailsByMentorId = studentRatingDetailRepository.getAllStudentAttendanceDetailsByMentorId(mentorId);
 
         return defaultResponse(studentAttendanceDetailsByMentorId, GET_ALL_STUDENTS_ATTENDANCE_DETAIL_BY_MENTOR_ID);
+    }
+
+    @Override
+    public SuccessResponse<StudentRatingDetail> getStudentAttendanceDetailById(Long studentAttendanceId) {
+        var studentRatingDetail = studentRatingDetailRepository.getReferenceById(studentAttendanceId);
+
+        return defaultResponse(studentRatingDetail, GET_STUDENT_ATTENDANCE_DETAIL_BY_ID);
     }
 
     @Override

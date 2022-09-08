@@ -16,6 +16,7 @@ public final class SuccessOrErrorMessages {
     public static final String USER_MAPPING_ADDED = "User Mapping Added";
     public static final String GET_ALL_MENTORS = "Get All Mentors";
     public static final String GET_ALL_STUDENTS_ATTENDANCE_DETAIL_BY_MENTOR_ID = "Get All students attendance detail by mentor id";
+    public static final String GET_STUDENT_ATTENDANCE_DETAIL_BY_ID = "Get student attendance detail by id";
     public static final String GET_ALL_MENTORS_BY_ACADEMY_ID = "Get All Mentors By Academy ID";
     public static final String GET_ALL_ACADEMY_AND_MENTORS_BY_STUDENT = "Get All Academy and Mentors By Student";
     public static final String GET_ALL_USERS_BY_SEARCH = "Get All Users by search";

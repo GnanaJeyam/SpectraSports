@@ -48,7 +48,7 @@ public class StudentMentorMappingImpl implements Mapping {
         studentMentorMapping.setSlotDays(request.slotDays());
 
         studentMentorRepository.save(studentMentorMapping);
-        studentRating.updateStudentRatingDetails(request.mentorId(), request.studentId());
+        studentRating.updateStudentRatingDetails(request);
     }
 
     public Set<Long> getAllMentorIdsByStudent(Long studentId) {

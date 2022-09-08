@@ -1,5 +1,6 @@
 package com.spectra.sports.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 @Data
+@JsonIgnoreProperties(value = "hibernateLazyInitializer")
 public class BaseEntity implements Serializable {
     @Column(name = "created_by")
     private Long createdBy;
