@@ -1,6 +1,7 @@
 package com.spectra.sports.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.spectra.sports.dto.StudentAttendanceRequest;
 import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.StudentRatingDetail;
 import com.spectra.sports.entity.User;
@@ -138,6 +139,13 @@ public class UserController {
         var allUsersByRole = userService.getAllUsersByRole(role, page, limit);
 
         return SuccessResponse.defaultResponse(allUsersByRole, "Get Users By Role");
+    }
+
+    @PostMapping({"/attendance/all"})
+    SuccessResponse<List<StudentRatingDetail>> getStudentAttendanceByStudentIdAndMentorOrAcademyId(@RequestBody StudentAttendanceRequest request) {
+        var studentAttendances = userService.getStudentAttendanceByStudentIdAndMentorOrAcademyId(request);
+
+        return studentAttendances;
     }
 
     @PostMapping({"/signup"})

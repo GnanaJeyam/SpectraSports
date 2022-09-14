@@ -3,6 +3,7 @@ package com.spectra.sports.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.spectra.sports.constant.SpectraConstant;
 import com.spectra.sports.dao.UserDao;
+import com.spectra.sports.dto.StudentAttendanceRequest;
 import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.Role;
 import com.spectra.sports.entity.RoleType;
@@ -44,8 +45,7 @@ import static com.spectra.sports.entity.RoleType.ACADEMY;
 import static com.spectra.sports.entity.RoleType.MENTOR;
 import static com.spectra.sports.response.SuccessResponse.defaultResponse;
 import static com.spectra.sports.response.SuccessResponse.errorResponse;
-import static com.spectra.sports.util.NumberUtil.toDouble;
-import static com.spectra.sports.util.NumberUtil.toLong;
+import static com.spectra.sports.util.NumberUtil.*;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -385,6 +385,21 @@ public class UserServiceImpl implements UserService {
         var studentAttendanceDetailsByMentorId = studentRatingDetailRepository.getAllStudentAttendanceDetailsByMentorId(mentorId);
 
         return defaultResponse(studentAttendanceDetailsByMentorId, GET_ALL_STUDENTS_ATTENDANCE_DETAIL_BY_MENTOR_ID);
+    }
+
+    @Override
+    public SuccessResponse<List<StudentRatingDetail>> getStudentAttendanceByStudentIdAndMentorOrAcademyId(StudentAttendanceRequest request) {
+        List<StudentRatingDetail> details;
+        if (notZero(request.academyId())) {
+            details = studentRatingDetailRepository
+                .getAttendanceDetailsByStudentAndMentorAndAcademyId(request.studentId(), request.mentorId(), request.academyId());
+        } else {
+            details = studentRatingDetailRepository.getAttendanceDetailsByStudentAndMentorId(request.studentId(), request.mentorId());
+        }
+
+        var studentRating = details.stream().findFirst().orElse(null);
+
+        return defaultResponse(studentRating, GET_ALL_STUDENTS_ATTENDANCE_DETAIL);
     }
 
     @Override

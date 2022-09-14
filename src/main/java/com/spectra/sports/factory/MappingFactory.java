@@ -27,9 +27,9 @@ public class MappingFactory {
 
         if (notZero(studentId, mentorId, academyId)) {
             return studentMentorAcademyMappingImpl;
-        }else if (notZero(mentorId, academyId)) {
+        } else if (notZero(mentorId, academyId)) {
             return mentorAcademyMappingImpl;
-        }else {
+        } else {
             return studentMentorMapping;
         }
     }

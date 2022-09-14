@@ -25,8 +25,12 @@ public final class NumberUtil {
     }
 
     public static boolean notZero(Long... values) {
-        for (Long value : values) {
-            if (value == 0l) {
+        if (values == null || values.length == 0) {
+            return false;
+        }
+
+        for (int i = 0; i < values.length; i++) {
+            if (isNull(values[i]) || values[i] == 0l) {
                 return false;
             }
         }

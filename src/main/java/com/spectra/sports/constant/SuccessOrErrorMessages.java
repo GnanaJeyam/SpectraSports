@@ -16,6 +16,7 @@ public final class SuccessOrErrorMessages {
     public static final String USER_MAPPING_ADDED = "User Mapping Added";
     public static final String GET_ALL_MENTORS = "Get All Mentors";
     public static final String GET_ALL_STUDENTS_ATTENDANCE_DETAIL_BY_MENTOR_ID = "Get All students attendance detail by mentor id";
+    public static final String GET_ALL_STUDENTS_ATTENDANCE_DETAIL = "Get All students attendance details";
     public static final String GET_STUDENT_ATTENDANCE_DETAIL_BY_ID = "Get student attendance detail by id";
     public static final String GET_ALL_MENTORS_BY_ACADEMY_ID = "Get All Mentors By Academy ID";
     public static final String GET_ALL_ACADEMY_AND_MENTORS_BY_STUDENT = "Get All Academy and Mentors By Student";
@@ -38,7 +39,6 @@ public final class SuccessOrErrorMessages {
     // Error Messages
     public static final String USER_CANNOT_BE_NULL = "User Cannot be null";
     public static final String STUDENT_RATING_DETAIL_ID_CANT_BE_NULL = "Student Rating Detail Id cannot be null.";
-
     public static final String DUPLICATE_USER = "Duplicate User, Please try with a different email or Phone Number";
     public static final String USER_NOT_FOUND = "User Not Found";
     public static final String INVALID_USERNAME_OR_PASSWORD = "Invalid username or password";

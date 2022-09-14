@@ -1,6 +1,7 @@
 package com.spectra.sports.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.spectra.sports.dto.StudentAttendanceRequest;
 import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.StudentRatingDetail;
 import com.spectra.sports.entity.User;
@@ -47,6 +48,8 @@ public interface UserService {
     SuccessResponse<List<UserDto>> getMentorsByUser(Integer page, Integer limit);
 
     SuccessResponse<List<StudentRatingDetail>> getAllStudentAttendanceByMentorId(Long mentorId);
+
+    SuccessResponse<List<StudentRatingDetail>> getStudentAttendanceByStudentIdAndMentorOrAcademyId(StudentAttendanceRequest request);
 
     SuccessResponse<StudentRatingDetail> getStudentAttendanceDetailById(Long studentAttendanceId);
 

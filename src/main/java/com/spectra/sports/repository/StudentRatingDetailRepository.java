@@ -18,6 +18,19 @@ public interface StudentRatingDetailRepository extends JpaRepository<StudentRati
     """)
     List<StudentRatingDetail> getAllStudentAttendanceDetailsByMentorId(Long mentorId);
 
+    @Query("""
+            SELECT studentDetail from StudentRatingDetail studentDetail WHERE studentDetail.mentorId = :mentorId 
+            AND studentDetail.studentId = :studentId ORDER BY studentDetail.studentRatingDetailId DESC
+    """)
+    List<StudentRatingDetail> getAttendanceDetailsByStudentAndMentorId(Long studentId, Long mentorId);
+
+
+    @Query("""
+            SELECT studentDetail from StudentRatingDetail studentDetail WHERE studentDetail.mentorId = :mentorId 
+            AND studentDetail.studentId = :studentId AND studentDetail.academyId = :academyId ORDER BY studentDetail.studentRatingDetailId DESC
+    """)
+    List<StudentRatingDetail> getAttendanceDetailsByStudentAndMentorAndAcademyId(Long studentId, Long mentorId, Long academyId);
+
     @Modifying
     @Transactional
     @Query("""

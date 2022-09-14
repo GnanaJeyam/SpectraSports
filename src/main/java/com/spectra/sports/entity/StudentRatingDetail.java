@@ -28,6 +28,9 @@ public class StudentRatingDetail extends BaseEntity {
     @Column(name = "mentor_id")
     private Long mentorId;
 
+    @Column(name = "academy_id")
+    private Long academyId;
+
     @Column(name = "student_id")
     private Long studentId;
 

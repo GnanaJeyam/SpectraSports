@@ -30,6 +30,7 @@ public class StudentRatingImpl {
         studentRatingDetail.setStudentId(request.studentId());
         studentRatingDetail.setCreatedBy(request.mentorId());
         studentRatingDetail.setAttendances(getAttendanceList());
+        studentRatingDetail.setAcademyId(request.academyId());
         studentRatingDetail.setAcademyName(request.academyName());
         studentRatingDetail.setSlot(request.slot());
         studentRatingDetail.setSlotDays(request.slotDays());
