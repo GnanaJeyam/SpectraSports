@@ -33,8 +33,13 @@ public class SpectraSportsScheduler {
     public void updateExpiryFlag() {
         log.info("Starting the expiry scheduler ................");
         var now = LocalDate.now();
+
+        updateMentorMappingExpiry(now);
+        updateAcademyMappingExpiry(now);
+    }
+
+    private void updateMentorMappingExpiry(LocalDate now) {
         var mentorExpiry = studentMentorRepository.getAllExpiryMappings(now);
-        var academyExpiry = studentMentorAcademyRepository.getAllExpiryMappings(now);
 
         if (!mentorExpiry.isEmpty()) {
 
@@ -55,6 +60,10 @@ public class SpectraSportsScheduler {
             log.info("Updating the Expiry status for student with mentor mapping......");
             log.info("Removing all existing student attendance with mentor mapping......");
         }
+    }
+
+    private void updateAcademyMappingExpiry(LocalDate now) {
+        var academyExpiry = studentMentorAcademyRepository.getAllExpiryMappings(now);
 
         if (!academyExpiry.isEmpty()) {
             var mentorWithAcademyStudents = academyExpiry.stream()
