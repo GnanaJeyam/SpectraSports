@@ -12,9 +12,9 @@ import java.util.Optional;
 public interface StudentMentorRepository extends JpaRepository<StudentMentorMapping, Long> {
     @Query("""
         SELECT studentMentor.mentorId FROM StudentMentorMapping studentMentor WHERE studentMentor.studentId = :studentId
-         AND studentMentor.expired = false AND studentMentor.tagged = true
+         AND studentMentor.mentorType = :mentorType AND studentMentor.expired = false AND studentMentor.tagged = true
     """)
-    List<Long> getAllMentorIdsByStudent(Long studentId);
+    List<Long> getAllMentorIdsByStudent(Long studentId, String mentorType);
 
     @Query("""
         SELECT studentMentor FROM StudentMentorMapping studentMentor WHERE studentMentor.studentId = :studentId

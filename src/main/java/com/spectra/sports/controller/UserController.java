@@ -59,7 +59,15 @@ public class UserController {
     @GetMapping({"/mentors"})
     SuccessResponse<List<UserDto>> getAllMentors(@RequestParam(value = "page", defaultValue = "1") Integer page,
                                                  @RequestParam(value = "limit",defaultValue = "20") Integer limit) {
-        var mentorsByRole = userService.getMentorsByUser(page, limit);
+        var mentorsByRole = userService.getMentorsByUserOrAcademy(page, limit);
+
+        return mentorsByRole;
+    }
+
+    @GetMapping({"/coaches"})
+    SuccessResponse<List<UserDto>> getAllCoaches(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                 @RequestParam(value = "limit",defaultValue = "20") Integer limit) {
+        var mentorsByRole = userService.getCoachesByUserUserOrAcademy(page, limit);
 
         return mentorsByRole;
     }
@@ -104,7 +112,7 @@ public class UserController {
         return mentorsOrAcademyByStudent;
     }
 
-    @GetMapping({"/detail/mentor/{mentorId}"})
+    @GetMapping({"/details/{mentorId}"})
     SuccessResponse<UserDto> getMentorDetailById(@PathVariable("mentorId") Long mentorId) {
         var mentorsOrAcademyByStudent = userService.getMentorDetailById(mentorId);
 

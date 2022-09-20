@@ -45,7 +45,9 @@ public interface UserService {
 
     SuccessResponse<String> updateUserMapping(Map<String, String> userDetails);
 
-    SuccessResponse<List<UserDto>> getMentorsByUser(Integer page, Integer limit);
+    SuccessResponse<List<UserDto>> getMentorsByUserOrAcademy(Integer page, Integer limit);
+
+    SuccessResponse<List<UserDto>> getCoachesByUserUserOrAcademy(Integer page, Integer limit);
 
     SuccessResponse<List<StudentRatingDetail>> getAllStudentAttendanceByMentorId(Long mentorId);
 

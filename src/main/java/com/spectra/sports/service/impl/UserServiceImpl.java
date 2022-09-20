@@ -43,6 +43,7 @@ import static com.spectra.sports.constant.SpectraConstant.*;
 import static com.spectra.sports.constant.SuccessOrErrorMessages.*;
 import static com.spectra.sports.entity.RoleType.ACADEMY;
 import static com.spectra.sports.entity.RoleType.MENTOR;
+import static com.spectra.sports.entity.RoleType.*;
 import static com.spectra.sports.response.SuccessResponse.defaultResponse;
 import static com.spectra.sports.response.SuccessResponse.errorResponse;
 import static com.spectra.sports.util.NumberUtil.*;
@@ -363,21 +364,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SuccessResponse<List<UserDto>> getMentorsByUser(Integer page, Integer limit) {
+    public SuccessResponse<List<UserDto>> getMentorsByUserOrAcademy(Integer page, Integer limit) {
         var currentUser = UserContextHolder.getCurrentUser();
         var currentRole = currentUser.roles().stream().findFirst().orElseThrow();
         var userId = currentUser.userId();
         var hasAcademy = ACADEMY.equals(currentRole.getRoleType());
 
-        var pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, USER_ID));
-        var mentors = userRepository.getAllUsersByRole(MENTOR, pageable);
-        var mentorIdsByAcademyOrStudent = hasAcademy ? mentorAcademy.getAllMentorIdsByAcademy(userId) : studentMentorMapping.getAllMentorIdsByStudent(userId);
+        return getResponseByMentorType(page, limit, userId, MENTOR, hasAcademy);
+    }
 
-        var mentorsDto = mentors.stream()
-                .map(user -> UserDto.from(user, mentorIdsByAcademyOrStudent.contains(user.getUserId())))
-                .collect(Collectors.toList());
+    @Override
+    public SuccessResponse<List<UserDto>> getCoachesByUserUserOrAcademy(Integer page, Integer limit) {
+        var currentUser = UserContextHolder.getCurrentUser();
+        var currentRole = currentUser.roles().stream().findFirst().orElseThrow();
+        var userId = currentUser.userId();
+        var hasAcademy = ACADEMY.equals(currentRole.getRoleType());
 
-        return defaultResponse(mentorsDto, GET_ALL_MENTORS);
+        return getResponseByMentorType(page, limit, userId, COACH, hasAcademy);
     }
 
     @Override
@@ -445,6 +448,19 @@ public class UserServiceImpl implements UserService {
                 .map(UserDto::from);
 
         return defaultResponse(userDtoStream, GET_ALL_USERS_BY_SEARCH);
+    }
+
+    private SuccessResponse getResponseByMentorType(Integer page, Integer limit, Long userId, RoleType mentorType, boolean hasAcademy) {
+        var pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, USER_ID));
+        var mentors = userRepository.getAllUsersByRole(mentorType, pageable);
+        var mentorIdsByAcademyOrStudent = hasAcademy ? mentorAcademy.getAllMentorIdsByAcademy(userId, mentorType.name()) :
+                studentMentorMapping.getAllMentorIdsByStudent(userId, mentorType.name());
+
+        var mentorsDto = mentors.stream()
+                .map(user -> UserDto.from(user, mentorIdsByAcademyOrStudent.contains(user.getUserId())))
+                .collect(Collectors.toList());
+
+        return defaultResponse(mentorsDto, GET_ALL_MENTORS);
     }
 
     private Map<String, ? extends Object> getResponse(int status, String message) {

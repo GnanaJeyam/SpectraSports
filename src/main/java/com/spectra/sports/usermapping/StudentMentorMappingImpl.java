@@ -51,8 +51,8 @@ public class StudentMentorMappingImpl implements Mapping {
         studentRating.updateStudentRatingDetails(request);
     }
 
-    public Set<Long> getAllMentorIdsByStudent(Long studentId) {
-        return studentMentorRepository.getAllMentorIdsByStudent(studentId)
+    public Set<Long> getAllMentorIdsByStudent(Long studentId, String mentorType) {
+        return studentMentorRepository.getAllMentorIdsByStudent(studentId, mentorType)
                 .stream().collect(Collectors.toSet());
     }
 
