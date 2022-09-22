@@ -1,6 +1,8 @@
 package com.spectra.sports.constant;
 
 public final class SpectraConstant {
+    public static final String SPECTRA_SPORTS = "SpectraSports";
+    public static final String SPECTRA_SPORTS_EMAIL = "spectra.sports@support.com";
     public static final String SUNDAY = "Sun";
     public static final String MONDAY = "Mon";
     public static final String TUESDAY = "Tue";

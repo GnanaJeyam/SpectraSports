@@ -161,7 +161,7 @@ public class UserServiceImpl implements UserService {
         var mentor = userRepository.findById(mentorId).orElseThrow();
         var roles = currentUser.roles().stream().findFirst().orElseThrow();
 
-        if (roles.getRoleType().equals(ACADEMY)) {
+        if (isAcademyOrCommunity(roles.getRoleType())) {
             var academyMapping = studentMentorAcademy.getEntityByMentorAndAcademyId(mentorId, userId);
             if (academyMapping.isPresent()) {
                 mentor.setSubscriptionInfo(SubscriptionInfo.from(academyMapping.get()));
@@ -356,10 +356,13 @@ public class UserServiceImpl implements UserService {
         var slot = userDetails.get(SLOT);
         var slotDays = userDetails.get(SLOT_DAYS);
         var amount = toDouble(userDetails.get(AMOUNT));
+        var email = userDetails.get(EMAIL);
+        var message = userDetails.get(MESSAGE);
 
         return new UserMappingRequest(
             studentId, mentorId, academyId, totalMonths, amount,
-            plan, mentorType, academyType, slot, slotDays, academyName
+            plan, mentorType, academyType, slot, slotDays, academyName,
+            email, message
         );
     }
 
@@ -368,9 +371,9 @@ public class UserServiceImpl implements UserService {
         var currentUser = UserContextHolder.getCurrentUser();
         var currentRole = currentUser.roles().stream().findFirst().orElseThrow();
         var userId = currentUser.userId();
-        var hasAcademy = ACADEMY.equals(currentRole.getRoleType());
+        var hasAcademy = isAcademyOrCommunity(currentRole.getRoleType());
 
-        return getResponseByMentorType(page, limit, userId, MENTOR, hasAcademy);
+        return getResponseByMentorType(page, limit, userId, MENTOR, hasAcademy, currentRole.getRoleType());
     }
 
     @Override
@@ -378,9 +381,9 @@ public class UserServiceImpl implements UserService {
         var currentUser = UserContextHolder.getCurrentUser();
         var currentRole = currentUser.roles().stream().findFirst().orElseThrow();
         var userId = currentUser.userId();
-        var hasAcademy = ACADEMY.equals(currentRole.getRoleType());
+        var hasAcademy = isAcademyOrCommunity(currentRole.getRoleType());
 
-        return getResponseByMentorType(page, limit, userId, COACH, hasAcademy);
+        return getResponseByMentorType(page, limit, userId, COACH, hasAcademy, currentRole.getRoleType());
     }
 
     @Override
@@ -450,10 +453,12 @@ public class UserServiceImpl implements UserService {
         return defaultResponse(userDtoStream, GET_ALL_USERS_BY_SEARCH);
     }
 
-    private SuccessResponse getResponseByMentorType(Integer page, Integer limit, Long userId, RoleType mentorType, boolean hasAcademy) {
+    private SuccessResponse getResponseByMentorType(Integer page, Integer limit, Long userId, RoleType mentorType,
+                                                    boolean hasAcademy, RoleType academyOrCommunity) {
         var pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, USER_ID));
         var mentors = userRepository.getAllUsersByRole(mentorType, pageable);
-        var mentorIdsByAcademyOrStudent = hasAcademy ? mentorAcademy.getAllMentorIdsByAcademy(userId, mentorType.name()) :
+        var mentorIdsByAcademyOrStudent = hasAcademy ?
+                mentorAcademy.getAllMentorIdsByAcademy(userId, mentorType.name(), academyOrCommunity.name()) :
                 studentMentorMapping.getAllMentorIdsByStudent(userId, mentorType.name());
 
         var mentorsDto = mentors.stream()
@@ -465,6 +470,10 @@ public class UserServiceImpl implements UserService {
 
     private Map<String, ? extends Object> getResponse(int status, String message) {
         return Map.of(BODY, Map.of(), STATUS, status, ERROR, true, MESSAGE, message);
+    }
+
+    private boolean isAcademyOrCommunity(RoleType roleType) {
+        return ACADEMY.equals(roleType) || COMMUNITY.equals(roleType);
     }
 
     private SuccessResponse validateAndGetUser(String otp, User user) {

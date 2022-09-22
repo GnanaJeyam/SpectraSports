@@ -4,6 +4,7 @@ import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.entity.StudentMentorMapping;
 import com.spectra.sports.entity.User;
 import com.spectra.sports.repository.StudentMentorRepository;
+import com.spectra.sports.service.EmailService;
 import com.spectra.sports.subscription.SubscriptionInfo;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,11 +24,14 @@ import static com.spectra.sports.constant.SpectraConstant.USER;
 public class StudentMentorMappingImpl implements Mapping {
     private final StudentMentorRepository studentMentorRepository;
     private final StudentRatingImpl studentRating;
+    private final EmailService emailService;
 
     public StudentMentorMappingImpl(StudentMentorRepository studentMentorRepository,
-                                    StudentRatingImpl studentRating) {
+                                    StudentRatingImpl studentRating,
+                                    EmailService emailService) {
         this.studentMentorRepository = studentMentorRepository;
         this.studentRating = studentRating;
+        this.emailService = emailService;
     }
 
     @Override
@@ -49,6 +54,9 @@ public class StudentMentorMappingImpl implements Mapping {
 
         studentMentorRepository.save(studentMentorMapping);
         studentRating.updateStudentRatingDetails(request);
+
+        var executorService = Executors.newFixedThreadPool(1);
+        executorService.submit(() -> emailService.sendSubscriptionEmail(request.email(), request.message()));
     }
 
     public Set<Long> getAllMentorIdsByStudent(Long studentId, String mentorType) {

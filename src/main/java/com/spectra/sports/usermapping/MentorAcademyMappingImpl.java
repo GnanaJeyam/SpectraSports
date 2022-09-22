@@ -36,9 +36,9 @@ public class MentorAcademyMappingImpl implements Mapping {
         log.info("Saved Mentor and Academy mapping for Academy {} and Mentor {} ", request.academyId(), request.mentorId());
     }
 
-    public Set<Long> getAllMentorIdsByAcademy(Long academyId, String mentorType) {
+    public Set<Long> getAllMentorIdsByAcademy(Long academyId, String mentorType, String academyType) {
         return mentorAcademyRepository
-                .getAllMentorIdsByAcademy(academyId, mentorType)
+                .getAllMentorIdsByAcademy(academyId, mentorType, academyType)
                 .stream()
                 .collect(Collectors.toSet());
     }

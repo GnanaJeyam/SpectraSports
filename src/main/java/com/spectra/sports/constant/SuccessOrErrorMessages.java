@@ -36,6 +36,35 @@ public final class SuccessOrErrorMessages {
             </html
     """;
 
+    // Email Templates
+    public static final String OTP_MESSAGE = """
+                <html>
+                <body>
+                <h5>Hello %s </h5>
+                <p>Please find your OTP below.</p>
+                <p style=\"font-size:40px\"> %s </p>
+                </body>   
+                </html>
+    """;
+    public static String OTP_SUBJECT = "Welcome back to SpectraSports";
+    public static String SIGNUP_SUBJECT = "Welcome to SpectraSports, %s";
+    public static String SIGNUP_CONTENT = """
+            <html>
+            <body>
+            <p> Please click this <a href=\"%s\">link</a> to verify</p>
+            </body>
+            </html>
+    """;
+    public static String SUBSCRIPTION_SUBJECT = "New Subscription Mapped to you";
+    public static String SUBSCRIPTION_CONTENT = """
+            <html>
+            <body>
+            <p> %s </p>
+            </body>
+            </html>
+    """;
+
+
     // Error Messages
     public static final String USER_CANNOT_BE_NULL = "User Cannot be null";
     public static final String STUDENT_RATING_DETAIL_ID_CANT_BE_NULL = "Student Rating Detail Id cannot be null.";
@@ -46,4 +75,5 @@ public final class SuccessOrErrorMessages {
     public static final String INVALID_USERNAME_OR_EMAIL = "Invalid Username or Email.";
     public static final String INVALID_OTP = "Invalid otp";
     public static final String ROLE_CANNOT_BE_NULL = "Role cannot be null";
+    public static final String SOMETHING_WENT_WRONG_WHILE_GENERATING_THE_TOKEN = "Something went wrong while generating the token";
 }

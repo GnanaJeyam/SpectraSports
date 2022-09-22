@@ -6,4 +6,6 @@ public interface EmailService {
     void sendSignUpVerificationEmail(UserDto user);
 
     void sendForgotPasswordVerificationEmail(UserDto user);
+
+    void sendSubscriptionEmail(String email, String message);
 }

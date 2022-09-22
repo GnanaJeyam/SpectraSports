@@ -12,21 +12,25 @@ import com.spectra.sports.dto.UserDto;
 import com.spectra.sports.helper.JwtHelper;
 import com.spectra.sports.repository.UserRepository;
 import com.spectra.sports.service.EmailService;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import static com.spectra.sports.constant.SpectraConstant.*;
+import static com.spectra.sports.constant.SuccessOrErrorMessages.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Service
+@Slf4j
 public class EmailServiceImpl implements EmailService {
     private final RestTemplate restTemplate;
     private final JwtHelper jwtHelper;
@@ -54,47 +58,44 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             jwtToken = jwtHelper.createToken(user);
-        } catch (JsonProcessingException var6) {
-
+        } catch (JsonProcessingException exception) {
+            log.error(SOMETHING_WENT_WRONG_WHILE_GENERATING_THE_TOKEN, exception);
         }
 
-        var subject = String.format("Welcome to SpectraSports, %s", user.firstName().concat(user.lastName()));
-        var content = """
-            <html>
-            <body>
-            <p> Please click this <a href=\"%s\">link</a> to verify</p>
-            </body>
-            </html>
-            """.formatted(domain.concat("/user/verify/").concat(jwtToken));
+        var firstName = user.firstName();
+        var email = user.email();
+        var subject = String.format(SIGNUP_SUBJECT, firstName.concat(user.lastName()));
+        var content = SIGNUP_CONTENT.formatted(domain.concat("/user/verify/").concat(jwtToken));
 
-        Map<String, Object> jsonObject = createEmailContent(user, subject, content);
+        Map<String, Object> jsonObject = createEmailContent(email, firstName, subject, content);
         sendEmailRequest(new Gson().toJson(jsonObject));
     }
 
     @Transactional
     public void sendForgotPasswordVerificationEmail(UserDto user) {
-        var otp = this.generateOtp();
+        var otp = generateOtp();
         userRepository.updateUserOtp(otp, user.userId());
-        var subject = "Welcome back to SpectraSports";
-        var body = """
-                <html>
-                <body>
-                <h5>Hello %s </h5>
-                <p>Please find your OTP below.</p>
-                <p style=\"font-size:40px\"> %s </p>
-                </body>   
-                </html>
-            """.formatted(user.firstName(), otp);
-        var emailContent = this.createEmailContent(user, subject, body);
+
+        var firstName = user.firstName();
+        var email = user.email();
+        var emailContent = createEmailContent(email, firstName, OTP_SUBJECT, OTP_MESSAGE.formatted(firstName, otp));
         sendEmailRequest(new Gson().toJson(emailContent));
     }
 
-    private Map<String, Object> createEmailContent(UserDto user, String subject, String content) {
+    @Override
+    public void sendSubscriptionEmail(String email, String message) {
+        var name = email.substring(0, email.indexOf("@"));
+        var emailContent = createEmailContent(email, name, SUBSCRIPTION_SUBJECT, SUBSCRIPTION_CONTENT.formatted(message));
+        log.info("Sending the subscription mapping email....");
+        sendEmailRequest(new Gson().toJson(emailContent));
+    }
+
+    private Map<String, Object> createEmailContent(String email, String name, String subject, String content) {
         HashMap<String, Object> json = new HashMap();
-        json.put(SENDER, Map.of(NAME, "SpectraSports", EMAIL, "spectra.sports@support.com"));
+        json.put(SENDER, Map.of(NAME, SPECTRA_SPORTS, EMAIL, SPECTRA_SPORTS_EMAIL));
         json.put(SUBJECT, subject);
         json.put(HTML_CONTENT, content);
-        json.put(TO, List.of(Map.of(NAME, user.firstName(), EMAIL, user.email())));
+        json.put(TO, List.of(Map.of(NAME, name, EMAIL, email)));
 
         return json;
     }
