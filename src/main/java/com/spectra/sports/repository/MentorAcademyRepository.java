@@ -16,6 +16,12 @@ public interface MentorAcademyRepository extends JpaRepository<MentorAcademyMapp
     List<Long> getAllMentorIdsByAcademy(Long academyId, String mentorType, String academyType);
 
     @Query("""
+       SELECT mentorAcademy.mentorAcademyMappingId FROM MentorAcademyMapping mentorAcademy WHERE mentorAcademy.academyId = :academyId  
+        AND mentorAcademy.mentorId = :mentorId AND mentorAcademy.tagged = true
+    """)
+    List<Long> getMentorAcademyIdByAcademyOrMentorId(Long academyId, Long mentorId);
+
+    @Query("""
         SELECT user FROM User user INNER JOIN MentorAcademyMapping mentorAcademy ON user.userId = mentorAcademy.mentorId  
         WHERE mentorAcademy.academyId = :academyId AND mentorAcademy.tagged = true 
     """)

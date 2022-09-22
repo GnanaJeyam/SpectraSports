@@ -162,11 +162,8 @@ public class UserServiceImpl implements UserService {
         var roles = currentUser.roles().stream().findFirst().orElseThrow();
 
         if (isAcademyOrCommunity(roles.getRoleType())) {
-            var academyMapping = studentMentorAcademy.getEntityByMentorAndAcademyId(mentorId, userId);
-            if (academyMapping.isPresent()) {
-                mentor.setSubscriptionInfo(SubscriptionInfo.from(academyMapping.get()));
-                mentor.setMapped(true);
-            }
+            var isMapped = mentorAcademy.hasMentorMappedWithAcademy(userId, mentorId);
+            mentor.setMapped(isMapped);
         } else if (roles.getRoleType().equals(RoleType.USER)) {
             var studentMentor = studentMentorMapping.getMentorDetailByMentorIdAndStudentId(mentorId, userId);
             if (studentMentor.isPresent()) {

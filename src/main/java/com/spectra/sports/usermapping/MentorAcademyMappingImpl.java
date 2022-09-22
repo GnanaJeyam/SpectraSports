@@ -6,6 +6,7 @@ import com.spectra.sports.repository.MentorAcademyRepository;
 import com.spectra.sports.repository.StudentMentorAcademyRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,6 +43,13 @@ public class MentorAcademyMappingImpl implements Mapping {
                 .stream()
                 .collect(Collectors.toSet());
     }
+
+    public boolean hasMentorMappedWithAcademy(Long academyId, Long mentorId) {
+        var mentorAcademyIdByAcademyOrMentorId = mentorAcademyRepository.getMentorAcademyIdByAcademyOrMentorId(academyId, mentorId);
+
+        return ! CollectionUtils.isEmpty(mentorAcademyIdByAcademyOrMentorId);
+    }
+
 
     public Stream<UserDto> getAllMentorDetailsByAcademyId(Long academyId, Long studentId) {
         var mentors = mentorAcademyRepository.getAllMentorDetailsByAcademyId(academyId);
