@@ -216,14 +216,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(Integer page, Integer limit) {
+    public SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(boolean isAcademy, Integer page, Integer limit) {
         var currentUser = UserContextHolder.getCurrentUser();
-        var academies = userRepository.getAllUsersByRole(ACADEMY, PageRequest.of(page - 1, limit));
-        var academyByStudentId = studentMentorAcademy.getAllAcademyByStudentId(currentUser.userId());
+        var roleType = isAcademy ? ACADEMY : COMMUNITY;
+        var academies = userRepository.getAllUsersByRole(roleType, PageRequest.of(page - 1, limit));
+        var studentAcademies = studentMentorAcademy.getAllAcademyByStudentId(currentUser.userId(), roleType.name());
 
         var academiesDto = academies
                 .stream()
-                .map(user -> UserDto.from(user, academyByStudentId.contains(user.getUserId())))
+                .map(user -> UserDto.from(user, studentAcademies.contains(user.getUserId())))
                 .collect(Collectors.toList());
 
         return defaultResponse(academiesDto, GET_ALL_ACADEMY_WITH_MAPPED_KEY);
@@ -232,7 +233,7 @@ public class UserServiceImpl implements UserService {
     public Map<String, ?> signInUser(Map<String, String> credentials) throws JsonProcessingException {
         var username = credentials.get(USERNAME);
         var password = credentials.get(PASSWORD);
-        var user = this.userRepository.getUserByUserName(username);
+        var user = userRepository.getUserByUserName(username);
 
         if (isNull(user)) {
             return getResponse(HttpStatus.UNAUTHORIZED.value(), INVALID_USER);
@@ -355,11 +356,12 @@ public class UserServiceImpl implements UserService {
         var amount = toDouble(userDetails.get(AMOUNT));
         var email = userDetails.get(EMAIL);
         var message = userDetails.get(MESSAGE);
+        var mappedName = userDetails.get(MAPPED_NAME);
 
         return new UserMappingRequest(
             studentId, mentorId, academyId, totalMonths, amount,
             plan, mentorType, academyType, slot, slotDays, academyName,
-            email, message
+            email, message, mappedName
         );
     }
 

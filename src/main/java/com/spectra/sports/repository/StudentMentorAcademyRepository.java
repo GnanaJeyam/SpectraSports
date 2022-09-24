@@ -14,9 +14,10 @@ public interface StudentMentorAcademyRepository extends JpaRepository<StudentMen
 
     @Query("""
         SELECT DISTINCT stdMentorAcademy.academyId from StudentMentorAcademyMapping stdMentorAcademy 
-         WHERE stdMentorAcademy.studentId = :studentId AND stdMentorAcademy.expired = false AND stdMentorAcademy.tagged = true      
+         WHERE stdMentorAcademy.studentId = :studentId AND stdMentorAcademy.academyType = :academyType 
+         AND stdMentorAcademy.expired = false AND stdMentorAcademy.tagged = true      
     """)
-    Set<Long> getAllAcademyByStudentId(Long studentId);
+    Set<Long> getAllAcademyByStudentId(Long studentId, String academyType);
 
     @Query("""
         SELECT DISTINCT stdMentorAcademy.mentorId from StudentMentorAcademyMapping stdMentorAcademy 

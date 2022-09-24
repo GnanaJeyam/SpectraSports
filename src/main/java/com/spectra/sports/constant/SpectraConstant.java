@@ -29,6 +29,7 @@ public final class SpectraConstant {
     public static final String STATUS = "status";
     public static final String ERROR = "error";
     public static final String MESSAGE = "message";
+    public static final String MAPPED_NAME = "mappedName";
     public static final String USER = "user";
     public static final String USER_ID = "userId";
     public static final String ACCESS_TOKEN = "accessToken";

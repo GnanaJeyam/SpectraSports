@@ -2,7 +2,7 @@ package com.spectra.sports.constant;
 
 public final class SuccessOrErrorMessages {
     // Success Messages
-    public static final String INVALID_USER = "<b>Invalid User. Please try again</b>";
+    public static final String INVALID_USER = "Invalid User. Please try again";
     public static final String SIGN_UP_SUCCESS_FUL = "Sign up SuccessFul";
     public static final String USER_UPDATED = "User Updated SuccessFully";
     public static final String STUDENT_ATTENDANCE_DETAILS_ARE_UPDATED = "Student attendance details are updated";

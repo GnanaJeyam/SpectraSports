@@ -9,7 +9,8 @@ import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 
 public record SubscriptionInfo(LocalDate startDate, LocalDate endDate, Boolean expired,
-                               String plan, Double amount, String slot, String slotDays, String academyName) {
+                               String plan, Double amount, String slot, String slotDays,
+                               String academyName, String mappedName) {
 
     public static SubscriptionInfo from(StudentMentorMapping studentMentor) {
         var expired = isNull(studentMentor.getExpired()) ? TRUE : studentMentor.getExpired();
@@ -22,6 +23,7 @@ public record SubscriptionInfo(LocalDate startDate, LocalDate endDate, Boolean e
                 studentMentor.getAmount(),
                 studentMentor.getSlot(),
                 studentMentor.getSlotDays(),
+                null,
                 null
         );
     }
@@ -37,7 +39,8 @@ public record SubscriptionInfo(LocalDate startDate, LocalDate endDate, Boolean e
                 studentMentorAcademy.getAmount(),
                 studentMentorAcademy.getSlot(),
                 studentMentorAcademy.getSlotDays(),
-                studentMentorAcademy.getAcademyName()
+                studentMentorAcademy.getAcademyName(),
+                studentMentorAcademy.getMappedName()
         );
     }
 }

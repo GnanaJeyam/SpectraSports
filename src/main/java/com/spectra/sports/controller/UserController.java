@@ -84,9 +84,10 @@ public class UserController {
     // Mentor has to return only mapped academy
     // only for student
     @GetMapping({"/all/academy"})
-    SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                              @RequestParam(value = "limit",defaultValue = "20") Integer limit) {
-        var mentorsByAcademy = userService.getAllAcademyWithMappedKey(page, limit);
+    SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(@RequestParam(value = "academy", defaultValue = "true") boolean isAcademy,
+                                                              @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                              @RequestParam(value = "limit",defaultValue = "100") Integer limit) {
+        var mentorsByAcademy = userService.getAllAcademyWithMappedKey(isAcademy, page, limit);
 
         return mentorsByAcademy;
     }
@@ -138,15 +139,6 @@ public class UserController {
         var mentorsOrAcademyByStudent = userService.getAcademyDetailById(academyId);
 
         return mentorsOrAcademyByStudent;
-    }
-
-    @GetMapping({"/all/{role}"})
-    SuccessResponse<List<UserDto>> getAllUsersByRole(@PathVariable("role") String role,
-                                                    @RequestParam("page") Integer page,
-                                                    @RequestParam(value = "limit",defaultValue = "10") Integer limit) {
-        var allUsersByRole = userService.getAllUsersByRole(role, page, limit);
-
-        return SuccessResponse.defaultResponse(allUsersByRole, "Get Users By Role");
     }
 
     @PostMapping({"/attendance/all"})

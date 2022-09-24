@@ -17,10 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table( name = "users", uniqueConstraints = {
-        @UniqueConstraint( columnNames = {"mobile_number"}),
-        @UniqueConstraint( columnNames = {"email"})
-})
+@Table( name = "users", uniqueConstraints = @UniqueConstraint( columnNames = "email") )
 @TypeDefs({
     @TypeDef( name = "json", typeClass = JsonType.class),
     @TypeDef( name = "string-array", typeClass = StringArrayType.class)

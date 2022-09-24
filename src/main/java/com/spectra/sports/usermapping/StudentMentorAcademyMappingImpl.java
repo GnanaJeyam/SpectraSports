@@ -52,6 +52,7 @@ public class StudentMentorAcademyMappingImpl implements Mapping {
         studentMentorAcademy.setAcademyType(request.academyType());
         studentMentorAcademy.setSlotDays(request.slotDays());
         studentMentorAcademy.setAcademyName(request.academyName());
+        studentMentorAcademy.setMappedName(request.mappedName());
 
         studentMentorAcademyRepository.save(studentMentorAcademy);
         studentRating.updateStudentRatingDetails(request);
@@ -60,9 +61,9 @@ public class StudentMentorAcademyMappingImpl implements Mapping {
         executorService.submit(() -> emailService.sendSubscriptionEmail(request.email(), request.message()));
     }
 
-    public Set<Long> getAllAcademyByStudentId(Long studentId) {
+    public Set<Long> getAllAcademyByStudentId(Long studentId, String academyType) {
 
-        return studentMentorAcademyRepository.getAllAcademyByStudentId(studentId);
+        return studentMentorAcademyRepository.getAllAcademyByStudentId(studentId, academyType);
     }
 
     public Optional<StudentMentorAcademyMapping> getEntityByMentorAndAcademyId(Long mentorId, Long academyId) {

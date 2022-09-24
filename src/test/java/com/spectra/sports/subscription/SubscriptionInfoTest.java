@@ -12,7 +12,8 @@ class SubscriptionInfoTest {
     void shouldReturnSubscriptionInfo() {
         var todayDate = LocalDate.now();
         var plan = "100 rs plan";
-        var subscriptionInfo = new SubscriptionInfo(todayDate, todayDate, false, plan, 10.0, "Slot", "Sunday", "academyName");
+        var subscriptionInfo = new SubscriptionInfo(todayDate, todayDate, false, plan, 10.0, "Slot",
+                "Sunday", "academyName", "mappedName");
 
         assertEquals(plan, subscriptionInfo.plan());
         assertEquals(todayDate, subscriptionInfo.startDate());

@@ -46,6 +46,9 @@ public class StudentMentorAcademyMapping extends BaseEntity {
     @Column(name = "academy_name")
     private String academyName;
 
+    @Column(name = "mapped_name")
+    private String mappedName;
+
     @Column(name = "amount")
     private Double amount;
 

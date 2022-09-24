@@ -27,7 +27,7 @@ public interface UserService {
 
     SuccessResponse<Map<String, ?>> getAllStudentByMentorId();
 
-    SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(Integer page, Integer limit);
+    SuccessResponse<List<UserDto>> getAllAcademyWithMappedKey(boolean isAcademy, Integer page, Integer limit);
 
     Map<String, ?> signInUser(Map<String, String> credentials) throws JsonProcessingException;
 
