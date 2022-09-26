@@ -49,6 +49,9 @@ import static com.spectra.sports.response.SuccessResponse.errorResponse;
 import static com.spectra.sports.util.NumberUtil.*;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
@@ -105,7 +108,7 @@ public class UserServiceImpl implements UserService {
             return new SuccessResponse<>(from, HttpStatus.OK.value(), false, SIGN_UP_SUCCESS_FUL);
         } catch (Exception exception) {
             String message = DUPLICATE_USER;
-            return new SuccessResponse<>(Map.of(), HttpStatus.NOT_ACCEPTABLE.value(), true, message);
+            return new SuccessResponse<>(Map.of(), NOT_ACCEPTABLE.value(), true, message);
         }
     }
 
@@ -236,16 +239,17 @@ public class UserServiceImpl implements UserService {
         var user = userRepository.getUserByUserName(username);
 
         if (isNull(user)) {
-            return getResponse(HttpStatus.UNAUTHORIZED.value(), INVALID_USER);
+            return getResponse(UNAUTHORIZED.value(), INVALID_USER);
         }
-        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
-            return getResponse(HttpStatus.UNAUTHORIZED.value(), INVALID_USERNAME_OR_PASSWORD);
+        if (isFalse(bCryptPasswordEncoder.matches(password, user.getPassword()))) {
+            return getResponse(UNAUTHORIZED.value(), INVALID_USERNAME_OR_PASSWORD);
         }
-        if (!user.getIsVerified()) {
-            return getResponse(HttpStatus.NOT_ACCEPTABLE.value(), USER_NOT_VERIFIED_YET);
+        if (isFalse(user.getIsVerified())) {
+            return getResponse(NOT_ACCEPTABLE.value(), USER_NOT_VERIFIED_YET);
         }
 
         var from = UserDto.from(user);
+
         return Map.of(
                 BODY, from,
                 STATUS, HttpStatus.OK.value(),
@@ -283,7 +287,7 @@ public class UserServiceImpl implements UserService {
     public SuccessResponse<String> sendEmailOtp(String email) {
         var user = userRepository.getUserByUserName(email);
         if (user == null) {
-            return errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), INVALID_USERNAME_OR_EMAIL);
+            return errorResponse(NOT_ACCEPTABLE.value(), INVALID_USERNAME_OR_EMAIL);
         }
 
         UserDto from = UserDto.from(user);
@@ -477,10 +481,10 @@ public class UserServiceImpl implements UserService {
 
     private SuccessResponse validateAndGetUser(String otp, User user) {
         if (isNull(user)) {
-            return errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), INVALID_USERNAME_OR_EMAIL);
+            return errorResponse(NOT_ACCEPTABLE.value(), INVALID_USERNAME_OR_EMAIL);
         }
         if (!Objects.equals(user.getOtp(), otp)) {
-            return errorResponse(HttpStatus.NOT_ACCEPTABLE.value(), INVALID_OTP);
+            return errorResponse(NOT_ACCEPTABLE.value(), INVALID_OTP);
         }
 
         return null;
