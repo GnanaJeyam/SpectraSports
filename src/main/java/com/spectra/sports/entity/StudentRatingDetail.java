@@ -38,6 +38,10 @@ public class StudentRatingDetail extends BaseEntity {
     @Column(name = "attendances", columnDefinition = "json")
     private List<Attendance> attendances;
 
+    @Type(type = "json")
+    @Column(name = "performances", columnDefinition = "json")
+    private List<Performance> performances;
+
     @Column(name = "rating")
     private String rating;
 

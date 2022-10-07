@@ -46,8 +46,9 @@ import static com.spectra.sports.entity.RoleType.MENTOR;
 import static com.spectra.sports.entity.RoleType.*;
 import static com.spectra.sports.response.SuccessResponse.defaultResponse;
 import static com.spectra.sports.response.SuccessResponse.errorResponse;
-import static com.spectra.sports.util.NumberUtil.*;
+import static com.spectra.sports.util.NumberUtil.notZero;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
@@ -128,10 +129,11 @@ public class UserServiceImpl implements UserService {
         var existingStudentRating = studentRatingDetailRepository.findById(studentRatingDetail.getStudentRatingDetailId()).orElseThrow();
         var existingAttendances = existingStudentRating.getAttendances();
 
-        var newAttendance = studentRatingDetail.getAttendances().stream().findFirst().orElseThrow();
+        var attendances = studentRatingDetail.getAttendances();
+        var newAttendance = isEmpty(attendances) ? null : attendances.stream().findFirst().get();
 
         studentRatingDetail.setAttendances(existingAttendances.stream().map(attendance -> {
-            if (attendance.getDay().equals(newAttendance.getDay())) {
+            if (nonNull(newAttendance) && attendance.getDay().equals(newAttendance.getDay())) {
                 return newAttendance;
             }
 
@@ -338,35 +340,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public SuccessResponse<String> updateUserMapping(Map<String, String> userDetails) {
-        var request = createUserMappingRequest(userDetails);
+        var request = UserMappingRequest.from(userDetails);
         var mapping = mappingFactory.getMapping(request);
         mapping.updateMappingDetails(request);
 
         return defaultResponse(Map.of(), USER_MAPPING_ADDED);
-    }
-
-
-    private UserMappingRequest createUserMappingRequest(Map<String, String> userDetails) {
-        var studentId = toLong(userDetails.get(STUDENT_ID));
-        var mentorId = toLong(userDetails.get(MENTOR_ID));
-        var academyId = toLong(userDetails.get(ACADEMY_ID));
-        var totalMonths = toLong(userDetails.get(MONTHS));
-        var plan = userDetails.get(PLAN);
-        var mentorType = userDetails.get(MENTOR_TYPE);
-        var academyType = userDetails.get(ACADEMY_TYPE);
-        var academyName = userDetails.get(ACADEMY_NAME);
-        var slot = userDetails.get(SLOT);
-        var slotDays = userDetails.get(SLOT_DAYS);
-        var amount = toDouble(userDetails.get(AMOUNT));
-        var email = userDetails.get(EMAIL);
-        var message = userDetails.get(MESSAGE);
-        var mappedName = userDetails.get(MAPPED_NAME);
-
-        return new UserMappingRequest(
-            studentId, mentorId, academyId, totalMonths, amount,
-            plan, mentorType, academyType, slot, slotDays, academyName,
-            email, message, mappedName
-        );
     }
 
     @Override
