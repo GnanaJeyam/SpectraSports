@@ -26,7 +26,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = " SELECT usr.* from users usr where ( :searchKey Ilike  any (usr.specialistin) ) limit 20 ", nativeQuery = true)
     List<User> getAllUsersBySpecialistIn(String searchKey);
 
-    @Query(value = "SELECT usr.* from users usr where ( usr.first_name Ilike %:searchKey% ) limit 20 ", nativeQuery = true)
+    @Query(value = "SELECT usr.* from users usr where ( ( usr.first_name Ilike %:searchKey% ) or ( usr.academy_name  Ilike %:searchKey%) ) limit 20 ",
+            nativeQuery = true)
     List<User> getAllUsersByName(String searchKey);
 
     @Modifying
