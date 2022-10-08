@@ -128,6 +128,7 @@ public class UserServiceImpl implements UserService {
 
         var existingStudentRating = studentRatingDetailRepository.findById(studentRatingDetail.getStudentRatingDetailId()).orElseThrow();
         var existingAttendances = existingStudentRating.getAttendances();
+        var performances = Optional.ofNullable(existingStudentRating.getPerformances()).orElse(new ArrayList<>());
 
         var attendances = studentRatingDetail.getAttendances();
         var newAttendance = isEmpty(attendances) ? null : attendances.stream().findFirst().get();
@@ -140,6 +141,9 @@ public class UserServiceImpl implements UserService {
             return attendance;
         }).collect(Collectors.toList()));
 
+        performances.addAll(studentRatingDetail.getPerformances());
+
+        studentRatingDetail.setPerformances(performances);
         studentRatingDetail.setAcademyName(existingStudentRating.getAcademyName());
         studentRatingDetail.setFullName(existingStudentRating.getFullName());
         studentRatingDetail.setSlot(existingStudentRating.getSlot());

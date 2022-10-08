@@ -162,49 +162,49 @@ public class UserController {
         return successResponse;
     }
 
-    @PostMapping({"/verification-email"})
+    @PostMapping("/verification-email")
     SuccessResponse<String> sendVerificationEmail(@RequestParam("email") String email) {
         var sentOtp = userService.resendVerificationEmail(email);
 
         return sentOtp;
     }
 
-    @PostMapping({"/validate-otp"})
+    @PostMapping("/validate-otp")
     SuccessResponse<String> validateOtp(@RequestBody Map<String, String> userDetails) {
         var sentOtp = userService.validateOtp(userDetails);
 
         return sentOtp;
     }
 
-    @PostMapping({"/reset-password"})
+    @PostMapping("/reset-password")
     SuccessResponse<String> resetPassword(@RequestBody Map<String, String> userDetails) {
         var resetPassword = userService.resetPassword(userDetails);
 
         return resetPassword;
     }
 
-    @PostMapping({"/upload"})
+    @PostMapping("/upload")
     SuccessResponse<String> uploadImage(MultipartFile file) throws IOException {
         var uploadFileToS3 = s3Service.uploadFileToS3(file);
 
         return uploadFileToS3;
     }
 
-    @PutMapping({"/update"})
+    @PutMapping("/update")
     SuccessResponse<?> updateUser(@RequestBody User user) {
         var updatedUser = userService.updateUser(user);
 
         return updatedUser;
     }
 
-    @PutMapping({"/update/student/attendance"})
+    @PutMapping("/update/student/attendance")
     SuccessResponse<?> updateStudentAttendance(@RequestBody StudentRatingDetail studentRatingDetail) {
         var updatedStudentDetail = userService.updateStudentAttendance(studentRatingDetail);
 
         return updatedStudentDetail;
     }
 
-    @PutMapping({"/update-mapping"})
+    @PutMapping("/update-mapping")
     SuccessResponse<?> updateUser(@RequestBody Map<String, String> userDetails) {
 
         return userService.updateUserMapping(userDetails);
