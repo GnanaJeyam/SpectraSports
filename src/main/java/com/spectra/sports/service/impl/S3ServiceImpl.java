@@ -43,11 +43,10 @@ public class S3ServiceImpl implements S3Service {
     public SuccessResponse uploadFileToS3(MultipartFile file) throws IOException {
         Assert.notNull(file, "Input File Cannot be null");
         var s3Client = this.getS3Client();
-        var var10000 = UUID.randomUUID();
-        var key = var10000 + file.getOriginalFilename().replaceAll("\\s+", "");
+        var key = UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+", "");
         s3Client.putObject(s3BucketName, key, file.getInputStream(), new ObjectMetadata());
 
-        return SuccessResponse.defaultResponse("https://%s.s3.amazonaws.com/%s".formatted(s3BucketName, key), "Image uploaded Successfully");
+        return SuccessResponse.defaultResponse(S3_PUBLIC_URL.formatted(s3BucketName, key), "Image uploaded Successfully");
     }
 
     private AmazonS3 getS3Client() {
