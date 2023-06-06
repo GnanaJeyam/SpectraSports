@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+import static com.spectra.sports.constant.SuccessOrErrorMessages.IMAGE_UPLOADED_SUCCESSFULLY;
+
 @Service
 public class S3ServiceImpl implements S3Service {
     private static final String S3_PUBLIC_URL = "https://%s.s3.amazonaws.com/%s";
@@ -46,7 +48,7 @@ public class S3ServiceImpl implements S3Service {
         var key = UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+", "");
         s3Client.putObject(s3BucketName, key, file.getInputStream(), new ObjectMetadata());
 
-        return SuccessResponse.defaultResponse(S3_PUBLIC_URL.formatted(s3BucketName, key), "Image uploaded Successfully");
+        return SuccessResponse.defaultResponse(S3_PUBLIC_URL.formatted(s3BucketName, key), IMAGE_UPLOADED_SUCCESSFULLY);
     }
 
     private AmazonS3 getS3Client() {

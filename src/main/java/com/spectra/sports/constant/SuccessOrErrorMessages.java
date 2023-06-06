@@ -5,6 +5,7 @@ public final class SuccessOrErrorMessages {
     public static final String INVALID_USER = "Invalid User. Please try again";
     public static final String SIGN_UP_SUCCESS_FUL = "Sign up SuccessFul";
     public static final String USER_UPDATED = "User Updated SuccessFully";
+    public static final String IMAGE_UPLOADED_SUCCESSFULLY = "Image uploaded Successfully";
     public static final String STUDENT_ATTENDANCE_DETAILS_ARE_UPDATED = "Student attendance details are updated";
     public static final String GET_BY_USER_ID = "Get by User Id";
     public static final String GET_MENTOR_DETAIL_BY_MENTOR_ID_WITH_MAPPED_FLAG = "Get Mentor Detail by mentor id with mapped flag";
