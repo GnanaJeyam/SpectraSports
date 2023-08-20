@@ -60,9 +60,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         if (nonNull(pathInfo)) {
             var requestMethod = request.getMethod();
             var urls = whiteListedUrls.get(requestMethod);
-            if (nonNull(urls) && urls.stream().anyMatch((path) -> pathInfo.contains(path))) {
-                return true;
-            }
+            return nonNull(urls) && urls.stream().anyMatch(pathInfo::contains);
         }
 
         return false;
