@@ -101,9 +101,8 @@ public class UserController {
 
     @GetMapping({"/mentor/students"})
     SuccessResponse<Map<String, ?>> getAllStudentByMentorId() {
-        var mentorsAndAcademyByStudent = userService.getAllStudentByMentorId();
 
-        return mentorsAndAcademyByStudent;
+        return userService.getAllStudentByMentorId();
     }
 
     @GetMapping({"/search/{searchKey}"})
