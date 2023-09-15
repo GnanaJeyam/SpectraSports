@@ -3,10 +3,17 @@ package com.spectra.sports.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -15,16 +22,12 @@ import java.util.Map;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Autowired
-    private AuthTokenFilter authTokenFilter;
 
-    private static final Map<String, String[]> allowedUrls = new HashMap();
+    private static final Map<String, String[]> allowedUrls = new HashMap<>();
 
     static {
         allowedUrls.put(POST.name(), new String[]{
@@ -34,37 +37,57 @@ public class SecurityConfig {
                 "/user/verify/**", "/user/email-otp/**", "/favicon.ico", "/user/download"
         });
     }
+    private final AuthTokenFilter authTokenFilter;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserDetailsService userDetailsService;
+
+    @Autowired
+    public SecurityConfig(AuthTokenFilter authTokenFilter, BCryptPasswordEncoder bCryptPasswordEncoder, UserDetailsService userDetailsService) {
+        this.authTokenFilter = authTokenFilter;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.userDetailsService = userDetailsService;
+    }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf()
-            .disable()
             .authorizeHttpRequests(auth ->
-                auth.antMatchers(POST, allowedUrls.get(POST.name())).permitAll()
-                    .antMatchers(GET, allowedUrls.get(GET.name())).permitAll())
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .exceptionHandling()
-            .accessDeniedHandler((req, res, exception) -> {
-                res.sendError(UNAUTHORIZED.value(), exception.getMessage());
-                res.setStatus(UNAUTHORIZED.value());
-            })
-            .and()
-            .httpBasic()
-            .disable()
-            .addFilterAfter(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
-            .httpBasic(withDefaults());
+                auth
+                    .requestMatchers(POST, allowedUrls.get(POST.name())).permitAll()
+                    .requestMatchers(GET, allowedUrls.get(GET.name())).permitAll()
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+            .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(authenticationProvider())
+            .exceptionHandling(AbstractHttpConfigurer::disable)
+            .anonymous(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider  = new DaoAuthenticationProvider(bCryptPasswordEncoder);
+        authenticationProvider.setUserDetailsService(userDetailsService);
+
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web
                 .ignoring()
-                .antMatchers(POST, allowedUrls.get(POST.name()))
-                .antMatchers(GET, allowedUrls.get(GET.name()));
+                .requestMatchers(POST, allowedUrls.get(POST.name()))
+                .requestMatchers(GET, allowedUrls.get(GET.name()));
     }
 }

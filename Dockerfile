@@ -1,9 +1,9 @@
 FROM gradle:jdk20-jammy as builder
 WORKDIR /spectra
 COPY . .
-RUN gradle build
+RUN gradle clean build
 
-FROM openjdk:19-alpine
+FROM amazoncorretto:20.0.2-alpine3.18
 WORKDIR /spectra
 COPY --from=builder /spectra/build/libs/spectrasports-0.0.1-SNAPSHOT.jar .
 CMD ["java", "-jar", "spectrasports-0.0.1-SNAPSHOT.jar"]

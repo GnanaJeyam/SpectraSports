@@ -1,17 +1,14 @@
 package com.spectra.sports.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonType;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.*;
 import java.util.List;
 
 @Data
-@TypeDefs({ @TypeDef(name = "json", typeClass = JsonType.class) })
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "student_details")
@@ -34,12 +31,14 @@ public class StudentRatingDetail extends BaseEntity {
     @Column(name = "student_id")
     private Long studentId;
 
-    @Type(type = "json")
+    @Type(JsonType.class)
     @Column(name = "attendances", columnDefinition = "json")
+    @Convert(attributeName = "attendances", converter = JsonType.class, disableConversion = true)
     private List<Attendance> attendances;
 
-    @Type(type = "json")
+    @Type(JsonType.class)
     @Column(name = "performances", columnDefinition = "json")
+    @Convert(attributeName = "performances", converter = JsonType.class, disableConversion = true)
     private List<Performance> performances;
 
     @Column(name = "rating")

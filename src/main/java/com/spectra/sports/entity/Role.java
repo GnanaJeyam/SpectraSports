@@ -1,18 +1,12 @@
 package com.spectra.sports.entity;
 
-import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.time.LocalDateTime;
 @Entity
 @Table(name = "roles")
-public class Role extends BaseEntity {
+public class Role extends BaseEntity implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
@@ -59,5 +53,11 @@ public class Role extends BaseEntity {
 
     public void setRolePriority(Byte rolePriority) {
         this.rolePriority = rolePriority;
+    }
+
+    @Override
+    public String getAuthority() {
+
+        return roleType.name();
     }
 }

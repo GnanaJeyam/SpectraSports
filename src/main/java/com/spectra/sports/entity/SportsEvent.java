@@ -1,20 +1,15 @@
 package com.spectra.sports.entity;
 
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "sports_event")
-@TypeDefs({
-    @TypeDef( name = "string-array", typeClass = StringArrayType.class)
-})
 @EqualsAndHashCode(callSuper=false)
 @Data
 public class SportsEvent extends BaseEntity {
@@ -53,7 +48,8 @@ public class SportsEvent extends BaseEntity {
     @Column(name = "event_time")
     private String eventTime;
 
-    @Type(type = "string-array")
+    @Type(StringArrayType.class)
+    @Convert(attributeName = "eventPoster", converter = StringArrayType.class, disableConversion = true)
     @Column(name = "event_poster_links", columnDefinition = "text[]")
     private String[] eventPoster;
 }

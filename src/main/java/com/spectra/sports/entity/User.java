@@ -3,28 +3,22 @@ package com.spectra.sports.entity;
 import com.spectra.sports.subscription.SubscriptionInfo;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonType;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table( name = "users", uniqueConstraints = @UniqueConstraint( columnNames = "email") )
-@TypeDefs({
-    @TypeDef( name = "json", typeClass = JsonType.class),
-    @TypeDef( name = "string-array", typeClass = StringArrayType.class)
-})
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY )
     @Column(name = "user_id")
@@ -87,14 +81,46 @@ public class User extends BaseEntity {
     @Column(name = "description", length = 250)
     private String description;
 
-    @Type(type = "string-array")
+    @Type(StringArrayType.class)
+    @Convert(attributeName = "specialistIn" , converter = StringArrayType.class, disableConversion = true)
     @Column(name = "specialistin", columnDefinition = "text[]")
     private String[] specialistIn;
 
-    @Type(type = "json")
+    @Type(JsonType.class)
+    @Convert(attributeName = "availableSlots", converter = JsonType.class, disableConversion = true)
     @Column(name = "available_slots", columnDefinition = "jsonb")
     private List<Slot> availableSlots = new ArrayList<>();
 
     @Column(name = "image_name", length = 250)
     private String imageName;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getRoleType().name())).toList();
+    }
+
+    @Override
+    public String getUsername() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 }

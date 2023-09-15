@@ -10,16 +10,16 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    @Query("SELECT user from User user WHERE user.email = :username")
+    @Query("SELECT user from User user join fetch user.roles ur WHERE user.email = :username")
     User getUserByUserName(String username);
 
     @Query("SELECT user from User user JOIN user.roles userRoles WHERE userRoles.roleType = :role AND user.isVerified = true")
     List<User> getAllUsersByRole(RoleType role, Pageable pageable);
 
     @Query("""
-        SELECT user from User user where user.userId IN  
-        (SELECT DISTINCT mentorAcademy.mentorId FROM MentorAcademyMapping mentorAcademy 
-        WHERE mentorAcademy.academyId = :academyId AND mentorAcademy.tagged = true) 
+        SELECT user from User user where user.userId IN \s
+        (SELECT DISTINCT mentorAcademy.mentorId FROM MentorAcademyMapping mentorAcademy\s
+        WHERE mentorAcademy.academyId = :academyId AND mentorAcademy.tagged = true)\s
     """)
     List<User> getAllMentorsByAcademy(Long academyId, Pageable pageable);
 

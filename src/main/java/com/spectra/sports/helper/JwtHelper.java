@@ -1,21 +1,20 @@
 package com.spectra.sports.helper;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spectra.sports.dto.UserDto;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 @Component
 public class JwtHelper {
@@ -24,23 +23,24 @@ public class JwtHelper {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public String createToken(UserDto user) throws JsonProcessingException {
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+    public String createToken(UserDto user) throws JsonProcessingException{
         Date tokenCreatedDate = new Date(System.currentTimeMillis());
         LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()).plusDays(5L);
         Date expiredDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(this.secretKey);
-        SecretKeySpec signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
-        JwtBuilder builder = Jwts.builder().setId("tokenId").setIssuedAt(tokenCreatedDate).setSubject(this.objectMapper.writeValueAsString(user)).setIssuer("SpectraSports").setExpiration(expiredDate).signWith(signatureAlgorithm, signingKey);
-        return builder.compact();
+        return JWT.create()
+                .withIssuer("SpectraSports")
+                .withSubject(objectMapper.writeValueAsString(user))
+                .withIssuedAt(tokenCreatedDate)
+                .withExpiresAt(expiredDate)
+                .sign(Algorithm.HMAC256(secretKey));
     }
 
     public UserDto parseToken(String jwt) throws JsonProcessingException {
-        Claims claims = Jwts.parser()
-                .setSigningKey(DatatypeConverter.parseBase64Binary(this.secretKey))
-                .parseClaimsJws(jwt)
-                .getBody();
+        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secretKey))
+                .withIssuer("SpectraSports")
+                .build();
+        DecodedJWT decodedJWT = verifier.verify(jwt);
 
-        return this.objectMapper.readValue(claims.getSubject(), UserDto.class);
+        return this.objectMapper.readValue(decodedJWT.getSubject(), UserDto.class);
     }
 }

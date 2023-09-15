@@ -1,12 +1,12 @@
 plugins {
-	id 'org.springframework.boot' version '2.7.2'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'org.springframework.boot' version '3.1.3'
+	id 'io.spring.dependency-management' version '1.1.3'
 	id 'java'
 }
 
 group = 'com.spectra.sports'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = JavaVersion.VERSION_19
+sourceCompatibility = JavaVersion.VERSION_20
 
 repositories {
 	mavenCentral()
@@ -19,14 +19,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'com.vladmihalcea:hibernate-types-55:2.18.0'
+	implementation 'com.vladmihalcea:hibernate-types-60:2.21.1'
 	implementation 'com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.13.3'
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.1'
 
-	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'com.auth0:java-jwt:4.4.0'
 	implementation 'com.google.code.gson:gson:2.9.0'
-	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.243'
-	implementation 'org.postgresql:postgresql:42.4.0'
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.261'
+	implementation 'org.postgresql:postgresql:42.4.3'
 	implementation 'org.apache.commons:commons-lang3:3.12.0'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

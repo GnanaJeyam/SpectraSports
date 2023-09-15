@@ -1,9 +1,8 @@
 package com.spectra.sports.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.persistence.*;
 
 @Entity
 @Table(name = "mentor_academy_mapping", indexes = {@Index(name = "mentor_academy_index", columnList = "mentor_id, academy_id")})
