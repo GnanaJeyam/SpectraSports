@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Objects.nonNull;
 
@@ -55,19 +56,23 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         var token = request.getHeader("Authorization");
+        var userNotAuthenticated = new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not Authenticated");
         if (token == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not Authenticated");
+            throw userNotAuthenticated;
         }
 
         try {
             var userDto = this.jwtHelper.parseToken(token);
             var userDetails = userDetailsService.loadUserByUsername(userDto.email());
+            if (Objects.isNull(userDetails)) {
+                throw userNotAuthenticated;
+            }
             UserContextHolder.setCurrentUser(userDto);
             var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             usernamePasswordAuthenticationToken.setDetails((new WebAuthenticationDetailsSource()).buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
+            throw userNotAuthenticated;
         }
 
         filterChain.doFilter(request, response);
