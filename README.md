@@ -2,9 +2,9 @@
 A Sports Academy Management Application
 
 # Tech Stack: 
->  ### Java 17 </br>
->  ### Spring boot 2.7.0 </br>
->  ### Gradle 7.4.2 </br>
+>  ### Java 20 </br>
+>  ### Spring boot 3 </br>
+>  ### Gradle 8.3 </br>
 >  ### Postgres 14.2
 ***
 <br />
